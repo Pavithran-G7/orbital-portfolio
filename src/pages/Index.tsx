@@ -1,14 +1,920 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useEffect, useRef, useState, useCallback } from "react";
 
-const Index = () => {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+declare const THREE: any;
+declare const gsap: any;
+declare const ScrollTrigger: any;
+declare const ScrollToPlugin: any;
+declare const TextPlugin: any;
+declare const Splitting: any;
+
+const NAV_LINKS = ["home","about","skills","projects","experience","contact"];
+
+const SKILLS = [
+  { name: "HTML5", icon: "fa-brands fa-html5", category: "FRONTEND", level: 90, status: "OPERATIONAL" },
+  { name: "CSS3", icon: "fa-brands fa-css3-alt", category: "FRONTEND", level: 85, status: "OPERATIONAL" },
+  { name: "JavaScript", icon: "fa-brands fa-js", category: "FRONTEND", level: 88, status: "OPERATIONAL" },
+  { name: "React", icon: "fa-brands fa-react", category: "FRONTEND", level: 82, status: "ADVANCED" },
+  { name: "Tailwind CSS", icon: "fa-solid fa-wind", category: "FRONTEND", level: 78, status: "OPERATIONAL" },
+  { name: "Node.js", icon: "fa-brands fa-node-js", category: "BACKEND", level: 75, status: "ADVANCED" },
+  { name: "Python", icon: "fa-brands fa-python", category: "BACKEND", level: 80, status: "OPERATIONAL" },
+  { name: "Express.js", icon: "fa-solid fa-server", category: "BACKEND", level: 70, status: "ADVANCED" },
+  { name: "MongoDB", icon: "fa-solid fa-database", category: "DATABASE", level: 72, status: "ADVANCED" },
+  { name: "MySQL", icon: "fa-solid fa-table", category: "DATABASE", level: 68, status: "ADVANCED" },
+  { name: "Firebase", icon: "fa-solid fa-fire", category: "DATABASE", level: 65, status: "LEARNING" },
+  { name: "Git", icon: "fa-brands fa-git-alt", category: "TOOLS", level: 85, status: "OPERATIONAL" },
+  { name: "GitHub", icon: "fa-brands fa-github", category: "TOOLS", level: 88, status: "OPERATIONAL" },
+  { name: "Docker", icon: "fa-brands fa-docker", category: "TOOLS", level: 55, status: "LEARNING" },
+  { name: "Figma", icon: "fa-brands fa-figma", category: "TOOLS", level: 70, status: "ADVANCED" },
+];
+
+const PROJECTS = [
+  { id: "001", title: "Personal Portfolio Website", desc: "A fully interactive portfolio with Three.js 3D scenes, GSAP scroll animations, and responsive design.", tech: ["React","Three.js","GSAP","CSS3"], gradient: "linear-gradient(135deg, #00c2ff33, #3dffa033)" },
+  { id: "002", title: "Weather Dashboard App", desc: "Real-time weather app with location search, 7-day forecasts, and interactive radar maps using OpenWeather API.", tech: ["React","OpenWeather API","Chart.js","Tailwind"], gradient: "linear-gradient(135deg, #f0a50033, #00c2ff33)" },
+  { id: "003", title: "Task Management System", desc: "Full-stack Kanban board with drag-and-drop, user auth, real-time collaboration, and project analytics.", tech: ["React","Node.js","MongoDB","Socket.io"], gradient: "linear-gradient(135deg, #3dffa033, #00c2ff33)" },
+  { id: "004", title: "E-Commerce Frontend Clone", desc: "Pixel-perfect Shopify-style storefront with cart functionality, product filtering, and Stripe checkout integration.", tech: ["React","Redux","Stripe","Firebase"], gradient: "linear-gradient(135deg, #00c2ff33, #f0a50033)" },
+  { id: "005", title: "Chat Application", desc: "Real-time messaging app with private rooms, typing indicators, file sharing, and message reactions.", tech: ["React","Socket.io","Express","MongoDB"], gradient: "linear-gradient(135deg, #f0a50033, #3dffa033)" },
+];
+
+const EDUCATION = [
+  { initial: "M", degree: "B.Tech in Computer Science", institution: "Mumbai Institute of Technology", year: "2022 – 2026", gpa: "GPA: 8.7/10", tags: ["Data Structures","Algorithms","Web Dev","DBMS","OS"], status: "pursuing" },
+  { initial: "S", degree: "Higher Secondary (Science)", institution: "St. Xavier's High School", year: "2020 – 2022", gpa: "94.6%", tags: ["Physics","Chemistry","Mathematics","Computer Science"], status: "completed" },
+];
+
+const ACHIEVEMENTS_STATS = [
+  { value: 500, suffix: "+", label: "Hours Coded" },
+  { value: 3, suffix: "", label: "Hackathons" },
+  { value: 15, suffix: "+", label: "Open Source Contributions" },
+  { value: 2, suffix: "", label: "Internships" },
+];
+
+const ACHIEVEMENT_CARDS = [
+  { icon: "fa-solid fa-trophy", title: "HackMIT 2024 — Top 10 Finalist", desc: "Built an AI-powered study assistant in 36 hours. Ranked in the top 10 out of 300+ teams." },
+  { icon: "fa-solid fa-certificate", title: "AWS Cloud Practitioner Certified", desc: "Earned the AWS Certified Cloud Practitioner certification, demonstrating cloud fluency." },
+  { icon: "fa-solid fa-code-branch", title: "Open Source Contributor — React", desc: "Contributed bug fixes and documentation improvements to the React ecosystem on GitHub." },
+  { icon: "fa-solid fa-medal", title: "Dean's List — Academic Excellence", desc: "Recognized on the Dean's List for maintaining a GPA above 8.5 for 4 consecutive semesters." },
+];
+
+const EXPERIENCE = [
+  { date: "Jun 2024 – Aug 2024", role: "Frontend Developer Intern", company: "TechFlow Solutions", bullets: ["Developed responsive UI components using React and Tailwind CSS for the company's SaaS platform","Optimized page load performance by 40% through code splitting and lazy loading strategies","Collaborated with the design team to implement pixel-perfect interfaces from Figma mockups"], status: "completed-status", statusText: "COMPLETED" },
+  { date: "Jan 2023 – Present", role: "Open Source Contributor", company: "GitHub Community", bullets: ["Contributed to 8+ open source projects including documentation and bug fixes","Maintained a personal library of reusable React components with 120+ GitHub stars","Reviewed pull requests and provided constructive feedback to fellow contributors"], status: "active", statusText: "ACTIVE" },
+  { date: "Sep 2023 – May 2024", role: "Tech Club Lead", company: "MIT Tech Society", bullets: ["Organized 12+ workshops on web development, Python, and competitive programming","Mentored 30+ junior students in their coding journey and project development","Led the team to win the inter-college hackathon with a smart campus navigation app"], status: "completed-status", statusText: "COMPLETED" },
+  { date: "Mar 2023 – Present", role: "Freelance Web Developer", company: "Self-Employed", bullets: ["Delivered 8+ client projects including landing pages, portfolios, and small business websites","Built custom WordPress themes and headless CMS solutions for content-driven sites","Maintained a 5-star rating on Fiverr with 100% client satisfaction rate"], status: "active", statusText: "ACTIVE" },
+];
+
+const SOCIAL_ICONS = [
+  { icon: "fa-brands fa-github", url: "#", tooltip: "GitHub" },
+  { icon: "fa-brands fa-linkedin", url: "#", tooltip: "LinkedIn" },
+  { icon: "fa-brands fa-x-twitter", url: "#", tooltip: "Twitter/X" },
+  { icon: "fa-brands fa-instagram", url: "#", tooltip: "Instagram" },
+  { icon: "fa-brands fa-free-code-camp", url: "#", tooltip: "LeetCode" },
+  { icon: "fa-solid fa-envelope", url: "#", tooltip: "Email" },
+];
+
+export default function Index() {
+  const [loaded, setLoaded] = useState(false);
+  const [navScrolled, setNavScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showBackTop, setShowBackTop] = useState(false);
+  const [activeNav, setActiveNav] = useState("home");
+  const [formSent, setFormSent] = useState(false);
+
+  const bgCanvasRef = useRef<HTMLCanvasElement>(null);
+  const heroCanvasRef = useRef<HTMLDivElement>(null);
+  const cursorRingRef = useRef<HTMLDivElement>(null);
+  const cursorDotRef = useRef<HTMLDivElement>(null);
+  const loaderBarRef = useRef<HTMLDivElement>(null);
+  const loaderTextRef = useRef<HTMLSpanElement>(null);
+  const heroRoleRef = useRef<HTMLDivElement>(null);
+  const heroTaglineRef = useRef<HTMLDivElement>(null);
+
+  const mousePos = useRef({ x: 0, y: 0 });
+  const ringPos = useRef({ x: 0, y: 0 });
+
+  // ===== LOADER SEQUENCE =====
+  useEffect(() => {
+    const tl = gsap.timeline();
+    tl.to({}, { duration: 0.7 })
+      .to(loaderTextRef.current, { duration: 1.0, text: "INITIALIZING PORTFOLIO SYSTEMS...", ease: "none" }, 0.9)
+      .call(() => { if (loaderBarRef.current) loaderBarRef.current.style.width = "100%"; }, [], 1.9)
+      .to("#loader > *", { opacity: 0, duration: 0.4 }, 2.7)
+      .call(() => setLoaded(true), [], 3.1);
+  }, []);
+
+  // ===== THREE.JS BACKGROUND =====
+  useEffect(() => {
+    if (!bgCanvasRef.current) return;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 3000);
+    camera.position.z = 400;
+    const renderer = new THREE.WebGLRenderer({ canvas: bgCanvasRef.current, antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const isMobile = window.innerWidth <= 768;
+    const starCount = isMobile ? 1500 : 6000;
+
+    // Stars
+    const starGeo = new THREE.BufferGeometry();
+    const positions = new Float32Array(starCount * 3);
+    const colors = new Float32Array(starCount * 3);
+    const sizes = new Float32Array(starCount);
+    for (let i = 0; i < starCount; i++) {
+      positions[i*3] = (Math.random()-0.5)*2000;
+      positions[i*3+1] = (Math.random()-0.5)*2000;
+      positions[i*3+2] = (Math.random()-0.5)*2000;
+      const isIce = Math.random() > 0.7;
+      colors[i*3] = isIce ? 0 : 0.78;
+      colors[i*3+1] = isIce ? 0.76 : 0.91;
+      colors[i*3+2] = 1;
+      sizes[i] = Math.random() > 0.5 ? 2.0 : 0.8;
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    starGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    starGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    const starMat = new THREE.PointsMaterial({ size: 1.5, vertexColors: true, transparent: true, opacity: 0.8, sizeAttenuation: true });
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+
+    // Wireframe drifters
+    const drifters: any[] = [];
+    const drifterMeshes: any[] = [];
+    const geos = [
+      new THREE.IcosahedronGeometry(20, 1),
+      new THREE.IcosahedronGeometry(28, 1),
+      new THREE.TorusGeometry(22, 1.5, 8, 32),
+      new THREE.TorusGeometry(18, 1.2, 8, 32),
+      new THREE.OctahedronGeometry(18, 0),
+    ];
+    geos.forEach((g, i) => {
+      const mat = new THREE.MeshBasicMaterial({ color: 0x00c2ff, wireframe: true, transparent: true, opacity: 0.12 + Math.random()*0.06 });
+      const m = new THREE.Mesh(g, mat);
+      m.position.set((Math.random()-0.5)*300, (Math.random()-0.5)*200, (Math.random()-0.5)*200);
+      if (i >= 2) m.rotation.z = 0.7;
+      scene.add(m);
+      drifterMeshes.push(m);
+      drifters.push({ mesh: m, driftDir: 1, driftSpeed: 0.005 + Math.random()*0.005, rotSpeed: { x: Math.random()*0.005, y: Math.random()*0.008, z: i===4 ? 0.003 : 0 } });
+    });
+
+    const sceneGroup = new THREE.Group();
+    sceneGroup.add(stars);
+    drifterMeshes.forEach(m => sceneGroup.add(m));
+    scene.add(sceneGroup);
+
+    let targetRotX = 0, targetRotY = 0;
+    const handleMouse = (e: MouseEvent) => {
+      targetRotX = (e.clientY / window.innerHeight - 0.5) * 0.3;
+      targetRotY = (e.clientX / window.innerWidth - 0.5) * 0.3;
+      mousePos.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener('mousemove', handleMouse);
+
+    let scrollY = 0;
+    const handleScroll = () => { scrollY = window.scrollY; };
+    window.addEventListener('scroll', handleScroll);
+
+    const animate = () => {
+      requestAnimationFrame(animate);
+      sceneGroup.rotation.x += (targetRotX - sceneGroup.rotation.x) * 0.03;
+      sceneGroup.rotation.y += (targetRotY - sceneGroup.rotation.y) * 0.03;
+      camera.position.z = 400 + scrollY * 0.15;
+      drifters.forEach(d => {
+        d.mesh.rotation.x += d.rotSpeed.x;
+        d.mesh.rotation.y += d.rotSpeed.y;
+        d.mesh.rotation.z += d.rotSpeed.z;
+        d.mesh.position.y += d.driftDir * d.driftSpeed;
+        if (Math.abs(d.mesh.position.y) > 120) d.driftDir *= -1;
+      });
+      // animate star drift
+      const pos = starGeo.attributes.position.array as Float32Array;
+      for (let i = 0; i < starCount; i++) {
+        pos[i*3+1] += Math.sin(Date.now() * 0.0001 + i) * 0.02;
+      }
+      starGeo.attributes.position.needsUpdate = true;
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouse);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+      renderer.dispose();
+    };
+  }, []);
+
+  // ===== HERO 3D CENTERPIECE =====
+  useEffect(() => {
+    if (!heroCanvasRef.current || !loaded) return;
+    const container = heroCanvasRef.current;
+    const w = container.clientWidth || 400;
+    const h = container.clientHeight || 400;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 500);
+    camera.position.z = 200;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const group = new THREE.Group();
+
+    // Inner solid icosahedron
+    const innerGeo = new THREE.IcosahedronGeometry(48, 1);
+    const innerMat = new THREE.MeshPhongMaterial({ color: 0x00c2ff, shininess: 100, flatShading: true });
+    const inner = new THREE.Mesh(innerGeo, innerMat);
+    group.add(inner);
+
+    // Outer wireframe cage
+    const outerGeo = new THREE.IcosahedronGeometry(68, 1);
+    const outerMat = new THREE.MeshBasicMaterial({ color: 0x00c2ff, wireframe: true, transparent: true, opacity: 0.25 });
+    group.add(new THREE.Mesh(outerGeo, outerMat));
+
+    // Rings
+    const ring1 = new THREE.Mesh(new THREE.TorusGeometry(82, 1.4, 16, 64), new THREE.MeshBasicMaterial({ color: 0x00c2ff, transparent: true, opacity: 0.2 }));
+    group.add(ring1);
+    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(94, 0.8, 16, 64), new THREE.MeshBasicMaterial({ color: 0x3dffa0, transparent: true, opacity: 0.15 }));
+    ring2.rotation.x = 0.73; // ~42 degrees
+    group.add(ring2);
+
+    // Orbiting points
+    const orbitGeo = new THREE.BufferGeometry();
+    const orbitPos = new Float32Array(60 * 3);
+    for (let i = 0; i < 60; i++) {
+      const phi = Math.acos(-1 + (2*i)/60);
+      const theta = Math.sqrt(60 * Math.PI) * phi;
+      orbitPos[i*3] = 85 * Math.cos(theta) * Math.sin(phi);
+      orbitPos[i*3+1] = 85 * Math.sin(theta) * Math.sin(phi);
+      orbitPos[i*3+2] = 85 * Math.cos(phi);
+    }
+    orbitGeo.setAttribute('position', new THREE.BufferAttribute(orbitPos, 3));
+    const orbitMat = new THREE.PointsMaterial({ color: 0x00c2ff, size: 2, transparent: true, opacity: 0.6 });
+    group.add(new THREE.Points(orbitGeo, orbitMat));
+
+    scene.add(group);
+    scene.add(new THREE.AmbientLight(0x001133, 0.5));
+    const pLight1 = new THREE.PointLight(0x00c2ff, 2.2, 400);
+    pLight1.position.set(100, 100, 100);
+    scene.add(pLight1);
+    const pLight2 = new THREE.PointLight(0x3dffa0, 1.0, 400);
+    pLight2.position.set(-100, -50, 80);
+    scene.add(pLight2);
+
+    let targetRX = 0, targetRY = 0;
+    const handleMouse = (e: MouseEvent) => {
+      targetRX = (e.clientY / window.innerHeight - 0.5) * 0.6;
+      targetRY = (e.clientX / window.innerWidth - 0.5) * 0.6;
+    };
+    window.addEventListener('mousemove', handleMouse);
+
+    const anim = () => {
+      requestAnimationFrame(anim);
+      group.rotation.y += 0.005;
+      ring1.rotation.x += 0.009;
+      ring2.rotation.y += 0.006;
+      group.rotation.x += (targetRX - group.rotation.x) * 0.04;
+      // keep the auto-rotation + mouse blend
+      renderer.render(scene, camera);
+    };
+    anim();
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouse);
+      renderer.dispose();
+      container.innerHTML = '';
+    };
+  }, [loaded]);
+
+  // ===== CUSTOM CURSOR =====
+  useEffect(() => {
+    if (window.innerWidth <= 768) return;
+    const ring = cursorRingRef.current;
+    const dot = cursorDotRef.current;
+    if (!ring || !dot) return;
+
+    let clicking = false;
+    const move = (e: MouseEvent) => {
+      dot.style.left = e.clientX + 'px';
+      dot.style.top = e.clientY + 'px';
+      mousePos.current = { x: e.clientX, y: e.clientY };
+    };
+    const down = () => { clicking = true; ring.classList.add('clicking'); dot.classList.add('clicking'); };
+    const up = () => { clicking = false; ring.classList.remove('clicking'); dot.classList.remove('clicking'); };
+
+    const lerpLoop = () => {
+      ringPos.current.x += (mousePos.current.x - ringPos.current.x) * 0.10;
+      ringPos.current.y += (mousePos.current.y - ringPos.current.y) * 0.10;
+      ring.style.left = ringPos.current.x + 'px';
+      ring.style.top = ringPos.current.y + 'px';
+      requestAnimationFrame(lerpLoop);
+    };
+    lerpLoop();
+
+    // Hover detection
+    const addHover = () => {
+      document.querySelectorAll('a, button, .btn-primary, .btn-secondary, .btn-transmit, .skill-card, .project-card').forEach(el => {
+        el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
+        el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+      });
+      document.querySelectorAll('p, h1, h2, h3, span, li').forEach(el => {
+        el.addEventListener('mouseenter', () => ring.classList.add('text-hover'));
+        el.addEventListener('mouseleave', () => ring.classList.remove('text-hover'));
+      });
+    };
+    setTimeout(addHover, 3500);
+
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mousedown', down);
+    window.addEventListener('mouseup', up);
+    return () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mousedown', down);
+      window.removeEventListener('mouseup', up);
+    };
+  }, []);
+
+  // ===== SCROLL TRACKING =====
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0);
+      setNavScrolled(scrollTop > 80);
+      setShowBackTop(scrollTop > 400);
+
+      // Active section
+      const sections = NAV_LINKS.map(id => document.getElementById(id));
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const s = sections[i];
+        if (s && s.getBoundingClientRect().top <= 200) {
+          setActiveNav(NAV_LINKS[i]);
+          break;
+        }
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // ===== GSAP ANIMATIONS =====
+  useEffect(() => {
+    if (!loaded) return;
+
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, TextPlugin);
+
+    // Wait a frame for DOM
+    requestAnimationFrame(() => {
+      // Splitting.js
+      Splitting({ target: '[data-splitting]', by: 'words' });
+
+      // ---- HERO ANIMATIONS ----
+      // Text scramble for role
+      const roleEl = heroRoleRef.current;
+      if (roleEl) {
+        const finalText = "Full-Stack Developer & Creative Coder";
+        let iter = 0;
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%";
+        const scrambleInterval = setInterval(() => {
+          roleEl.textContent = finalText.split("").map((c, i) => i < iter ? c : chars[Math.floor(Math.random()*chars.length)]).join("");
+          iter += 1/2;
+          if (iter >= finalText.length) { clearInterval(scrambleInterval); roleEl.textContent = finalText; }
+        }, 40);
+      }
+
+      // Tagline typewriter cycle
+      const taglineEl = heroTaglineRef.current;
+      if (taglineEl) {
+        const phrases = ["Building the future, one commit at a time.", "Turning caffeine into clean code.", "Passionate about pixels and performance."];
+        let pIdx = 0;
+        const cyclePhrase = () => {
+          gsap.to(taglineEl, { duration: 1.5, text: phrases[pIdx], ease: "none", onComplete: () => {
+            gsap.delayedCall(2, () => {
+              gsap.to(taglineEl, { duration: 0.5, text: "", ease: "none", onComplete: () => {
+                pIdx = (pIdx + 1) % phrases.length;
+                cyclePhrase();
+              }});
+            });
+          }});
+        };
+        gsap.delayedCall(1, cyclePhrase);
+      }
+
+      // Hero pin + parallax exit
+      gsap.to(".hero-text", {
+        x: -120, opacity: 0,
+        scrollTrigger: { trigger: "#home", start: "top top", end: "+=150%", scrub: 1, pin: true }
+      });
+      gsap.to(".hero-3d", {
+        scale: 0.6, opacity: 0, rotation: 30,
+        scrollTrigger: { trigger: "#home", start: "top top", end: "+=150%", scrub: 1 }
+      });
+
+      // ---- ABOUT: Curtain word reveal ----
+      const aboutWords = document.querySelectorAll('.about-section [data-splitting] .word');
+      if (aboutWords.length) {
+        gsap.from(aboutWords, {
+          y: "100%", opacity: 0, rotationX: -80,
+          stagger: { each: 0.02, from: "start" },
+          ease: "power4.out",
+          scrollTrigger: { trigger: ".about-section", start: "top 70%", end: "top 20%", scrub: 0.8 }
+        });
+      }
+
+      // Stat counters
+      document.querySelectorAll('.stat-number[data-target]').forEach(el => {
+        const target = parseInt((el as HTMLElement).dataset.target || "0");
+        const suffix = (el as HTMLElement).dataset.suffix || "";
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top 85%",
+          once: true,
+          onEnter: () => {
+            const obj = { val: 0 };
+            gsap.to(obj, { val: target, duration: 1.5, ease: "power2.out", onUpdate: () => {
+              (el as HTMLElement).textContent = Math.floor(obj.val) + suffix;
+            }});
+          }
+        });
+      });
+
+      // ---- SKILLS: 3D card flip cascade ----
+      const skillCards = document.querySelectorAll('.skill-card');
+      gsap.from(skillCards, {
+        rotateX: 90, opacity: 0, y: 40,
+        transformOrigin: "top center",
+        stagger: { each: 0.07, from: "center" },
+        duration: 0.9,
+        ease: "back.out(1.5)",
+        scrollTrigger: { trigger: ".skills-section", start: "top 60%", toggleActions: "play none none reverse" }
+      });
+
+      // Skills heading chars
+      const skillChars = document.querySelectorAll('.skills-section .section-heading .char');
+      if (skillChars.length) {
+        gsap.from(skillChars, {
+          opacity: 0, y: 80, rotation: -15,
+          stagger: 0.04, ease: "expo.out",
+          scrollTrigger: { trigger: ".skills-section", start: "top 70%", toggleActions: "play none none reverse" }
+        });
+      }
+
+      // Skill bar fill
+      document.querySelectorAll('.skill-bar-fill').forEach(bar => {
+        const level = (bar as HTMLElement).dataset.level || "0";
+        ScrollTrigger.create({
+          trigger: bar,
+          start: "top 90%",
+          once: true,
+          onEnter: () => { (bar as HTMLElement).style.width = level + "%"; }
+        });
+      });
+
+      // ---- PROJECTS: Horizontal scroll ----
+      const track = document.querySelector('.projects-track') as HTMLElement;
+      if (track) {
+        const getScrollAmount = () => -(track.scrollWidth - window.innerWidth);
+        gsap.to(track, {
+          x: getScrollAmount,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".projects-section",
+            start: "top top",
+            end: () => "+=" + (track.scrollWidth - window.innerWidth),
+            pin: true,
+            scrub: 1.2,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          }
+        });
+      }
+
+      // ---- EDUCATION: clip-path morph ----
+      document.querySelectorAll('.education-card').forEach(card => {
+        gsap.fromTo(card,
+          { clipPath: "polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)", opacity: 0 },
+          { clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)", opacity: 1, duration: 1.1, ease: "power3.out",
+            scrollTrigger: { trigger: card, start: "top 80%", toggleActions: "play none none reverse" }
+          }
+        );
+      });
+
+      // Education line height
+      const eduLine = document.querySelector('.education-line') as HTMLElement;
+      if (eduLine) {
+        gsap.to(eduLine, {
+          height: "100%",
+          scrollTrigger: { trigger: ".education-section", start: "top 60%", end: "bottom 60%", scrub: 1 }
+        });
+      }
+
+      // ---- ACHIEVEMENTS: counter + radial burst ----
+      document.querySelectorAll('.achievement-stat-number[data-target]').forEach(el => {
+        const target = parseInt((el as HTMLElement).dataset.target || "0");
+        const suffix = (el as HTMLElement).dataset.suffix || "";
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top 85%",
+          once: true,
+          onEnter: () => {
+            const obj = { val: 0 };
+            gsap.to(obj, { val: target, duration: 1.5, ease: "power2.out", onUpdate: () => {
+              (el as HTMLElement).textContent = Math.floor(obj.val) + suffix;
+            }});
+            // Burst
+            const burst = (el as HTMLElement).parentElement?.querySelector('.radial-burst');
+            if (burst) {
+              gsap.fromTo(burst.children, { scale: 0, opacity: 1 }, { scale: 1, opacity: 0, duration: 0.8, stagger: 0.03, ease: "power2.out" });
+            }
+          }
+        });
+      });
+
+      // Achievement cards slide from right
+      gsap.from('.achievement-card', {
+        x: 60, opacity: 0, stagger: 0.1, duration: 0.8, ease: "power3.out",
+        scrollTrigger: { trigger: '.achievement-cards', start: "top 80%", toggleActions: "play none none reverse" }
+      });
+
+      // ---- EXPERIENCE: SVG line draw + card flip ----
+      const svgLine = document.querySelector('.exp-svg-path') as SVGPathElement;
+      if (svgLine) {
+        const length = svgLine.getTotalLength();
+        svgLine.style.strokeDasharray = String(length);
+        svgLine.style.strokeDashoffset = String(length);
+        gsap.to(svgLine, {
+          strokeDashoffset: 0,
+          scrollTrigger: { trigger: ".experience-section", start: "top 50%", end: "bottom 60%", scrub: 1 }
+        });
+      }
+
+      document.querySelectorAll('.exp-card').forEach(card => {
+        gsap.from(card, {
+          rotationX: 90, opacity: 0, transformOrigin: "top center", duration: 1.0, ease: "power4.out",
+          scrollTrigger: { trigger: card, start: "top 80%", toggleActions: "play none none reverse" }
+        });
+      });
+
+      // ---- CONTACT: Scale + spring ----
+      gsap.from('.radar-container', {
+        scale: 0, duration: 1, ease: "elastic.out(1, 0.5)",
+        scrollTrigger: { trigger: ".contact-section", start: "top 70%", toggleActions: "play none none reverse" }
+      });
+      gsap.from('.contact-form', {
+        y: 80, opacity: 0, duration: 0.8, delay: 0.2, ease: "power3.out",
+        scrollTrigger: { trigger: ".contact-section", start: "top 70%", toggleActions: "play none none reverse" }
+      });
+      gsap.from('.contact-link-row', {
+        x: -40, opacity: 0, stagger: 0.06, duration: 0.6, ease: "power3.out",
+        scrollTrigger: { trigger: ".contact-links", start: "top 85%", toggleActions: "play none none reverse" }
+      });
+
+    });
+
+    return () => { ScrollTrigger.getAll().forEach((t: any) => t.kill()); };
+  }, [loaded]);
+
+  // ===== SKILL CARD TILT (mouse) =====
+  const handleSkillMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (window.innerWidth <= 768) return;
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    card.style.transform = `rotateY(${x*15}deg) rotateX(${-y*15}deg)`;
+  }, []);
+  const handleSkillMouseLeave = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.transform = '';
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    gsap.to(window, { scrollTo: { y: `#${id}`, offsetY: 64 }, duration: 1.5, ease: "power4.inOut" });
+    setMobileMenuOpen(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormSent(true);
+    setTimeout(() => setFormSent(false), 3000);
+  };
+
+  const SocialIcons = ({ className = "" }: { className?: string }) => (
+    <div className={`social-icons ${className}`}>
+      {SOCIAL_ICONS.map(s => (
+        <a key={s.tooltip} href={s.url} data-tooltip={s.tooltip} aria-label={s.tooltip}>
+          <i className={s.icon}></i>
+        </a>
+      ))}
     </div>
   );
-};
 
-export default Index;
+  return (
+    <>
+      {/* LOADER */}
+      <div id="loader" className={loaded ? "hidden" : ""}>
+        <div className="loader-scanline" />
+        <svg className="loader-logo" viewBox="0 0 60 60">
+          <polygon points="30,2 58,30 30,58 2,30" fill="none" stroke="hsl(195,100%,50%)" strokeWidth="2"/>
+          <polygon points="30,12 48,30 30,48 12,30" fill="none" stroke="hsl(195,100%,50%)" strokeWidth="1.5" opacity="0.5"/>
+        </svg>
+        <div className="loader-text"><span ref={loaderTextRef}></span></div>
+        <div className="loader-progress"><div className="loader-progress-bar" ref={loaderBarRef}></div></div>
+      </div>
+
+      {/* CURSORS */}
+      <div className="cursor-ring" ref={cursorRingRef}></div>
+      <div className="cursor-dot" ref={cursorDotRef}></div>
+
+      {/* BG CANVAS */}
+      <canvas id="bg-canvas" ref={bgCanvasRef}></canvas>
+
+      {/* FOG */}
+      <div className="fog-overlay">
+        <div className="fog-blob"></div>
+        <div className="fog-blob"></div>
+        <div className="fog-blob"></div>
+        <div className="fog-blob"></div>
+      </div>
+
+      {/* NAVBAR */}
+      <nav className={`navbar ${navScrolled ? 'scrolled' : ''}`}>
+        <svg width="36" height="36" viewBox="0 0 36 36" onClick={() => scrollToSection('home')} style={{ cursor: 'pointer' }}>
+          <polygon points="18,2 34,18 18,34 2,18" fill="none" stroke="hsl(195,100%,50%)" strokeWidth="2"/>
+          <polygon points="18,8 28,18 18,28 8,18" fill="none" stroke="hsl(195,100%,50%)" strokeWidth="1.5" opacity="0.5"/>
+        </svg>
+        <ul className="nav-links">
+          {NAV_LINKS.map(id => (
+            <li key={id}><a className={activeNav === id ? 'active' : ''} onClick={() => scrollToSection(id)}>{id}</a></li>
+          ))}
+        </ul>
+        <SocialIcons />
+        <div className={`hamburger ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          <span/><span/><span/>
+        </div>
+      </nav>
+
+      {/* SCROLL PROGRESS */}
+      <div className="scroll-progress" style={{ width: `${scrollProgress}%` }}></div>
+
+      {/* MOBILE MENU */}
+      <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+        {NAV_LINKS.map(id => (
+          <a key={id} onClick={() => scrollToSection(id)}>{id}</a>
+        ))}
+        <SocialIcons />
+      </div>
+
+      <div className="content-wrapper">
+        {/* ===== HERO ===== */}
+        <section id="home" className="hero-section">
+          <div className="hero-text">
+            <div className="hero-status"><span className="dot"></span> SYSTEM ONLINE</div>
+            <h1 className="hero-name">ALEX CHEN</h1>
+            <div className="hero-role" ref={heroRoleRef}>&nbsp;</div>
+            <div className="hero-tagline" ref={heroTaglineRef}>&nbsp;</div>
+            <div className="hero-buttons">
+              <button className="btn-primary" onClick={() => scrollToSection('projects')}>VIEW PROJECTS</button>
+              <button className="btn-secondary" onClick={() => scrollToSection('contact')}>CONTACT ME</button>
+            </div>
+            <div className="hero-social">
+              {SOCIAL_ICONS.map(s => (
+                <a key={s.tooltip} href={s.url} aria-label={s.tooltip}><i className={s.icon}></i></a>
+              ))}
+            </div>
+          </div>
+          <div className="hero-3d" ref={heroCanvasRef}></div>
+        </section>
+
+        {/* ===== ABOUT ===== */}
+        <section id="about" className="about-section">
+          <span className="section-label">// 01. WHO I AM</span>
+          <h2 className="section-heading" data-splitting>About <span className="accent">Me</span></h2>
+          <div className="about-grid">
+            <div>
+              <div className="about-avatar-wrap">
+                <div className="about-avatar">AC</div>
+                <div className="about-avatar-border"></div>
+                <div className="about-scan-line"></div>
+              </div>
+              <span className="about-badge">STUDENT DEVELOPER</span>
+            </div>
+            <div className="about-text">
+              <p data-splitting>I'm a third-year Computer Science student at Mumbai Institute of Technology with a deep passion for building beautiful, functional web experiences. My journey started with a simple HTML page in high school and has evolved into a full-stack skill set spanning React, Node.js, Python, and cloud technologies.</p>
+              <p data-splitting>When I'm not coding, you'll find me contributing to open-source projects, participating in hackathons, or mentoring junior developers at our college tech club. I believe great software is born from the intersection of clean code, thoughtful design, and relentless curiosity.</p>
+              <p data-splitting>I'm currently seeking internship opportunities where I can apply my skills to real-world problems and continue growing as a developer. Let's build something amazing together.</p>
+              <div className="about-stats">
+                {[
+                  { val: 2, suffix: "+", label: "Years Coding" },
+                  { val: 20, suffix: "+", label: "Projects" },
+                  { val: 8, suffix: "", label: "Technologies" },
+                  { val: 3, suffix: "", label: "Hackathons" },
+                ].map(s => (
+                  <div className="stat-card" key={s.label}>
+                    <div className="stat-number" data-target={s.val} data-suffix={s.suffix}>0</div>
+                    <div className="stat-label">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== SKILLS ===== */}
+        <section id="skills" className="skills-section">
+          <span className="section-label">// 02. TECH ARSENAL</span>
+          <h2 className="section-heading" data-splitting>My <span className="accent">Skills</span></h2>
+          <div className="skills-grid">
+            {SKILLS.map(skill => (
+              <div className="skill-card" key={skill.name} onMouseMove={handleSkillMouseMove} onMouseLeave={handleSkillMouseLeave}>
+                <div className="skill-icon"><i className={skill.icon}></i></div>
+                <div className="skill-name">{skill.name}</div>
+                <div className="skill-category">{skill.category}</div>
+                <div className="skill-bar"><div className="skill-bar-fill" data-level={skill.level}></div></div>
+                <div className="skill-status">{skill.status}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ===== PROJECTS ===== */}
+        <section className="projects-section">
+          <span className="section-label">// 03. MISSION LOG</span>
+          <h2 className="section-heading">Featured <span className="accent">Projects</span></h2>
+          <div className="projects-track">
+            {PROJECTS.map(p => (
+              <div className="project-card" key={p.id}>
+                <div className="project-visual">
+                  <div className="gradient-bg" style={{ background: p.gradient, width: '100%', height: '100%' }}></div>
+                  <div className="project-mission">MISSION-{p.id}</div>
+                </div>
+                <div className="project-content">
+                  <div className="project-title">{p.title}</div>
+                  <div className="project-desc">{p.desc}</div>
+                  <div className="project-tech">
+                    {p.tech.map(t => <span key={t}>{t}</span>)}
+                  </div>
+                  <div className="project-links">
+                    <a href="#">↗ LIVE DEMO</a>
+                    <a href="#">{"</>"} SOURCE CODE</a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ===== EDUCATION ===== */}
+        <section id="education" className="education-section">
+          <span className="section-label">// 04. KNOWLEDGE BASE</span>
+          <h2 className="section-heading">Education</h2>
+          <div className="education-timeline">
+            <div className="education-line"></div>
+            {EDUCATION.map((edu, i) => (
+              <div className="education-card" key={i}>
+                <div className="edu-initial">{edu.initial}</div>
+                <div className="edu-degree">{edu.degree}</div>
+                <div className="edu-institution">{edu.institution}</div>
+                <div className="edu-meta">
+                  <span className="edu-year">{edu.year}</span>
+                  <span className="edu-gpa">{edu.gpa}</span>
+                </div>
+                <div className="edu-tags">
+                  {edu.tags.map(t => <span key={t}>{t}</span>)}
+                </div>
+                <div className={`edu-status ${edu.status}`}>{edu.status === 'pursuing' ? '● PURSUING' : '✓ COMPLETED'}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ===== ACHIEVEMENTS ===== */}
+        <section className="achievements-section">
+          <span className="section-label">// 05. MILESTONES</span>
+          <h2 className="section-heading">Achievements</h2>
+          <div className="achievements-stats">
+            {ACHIEVEMENTS_STATS.map((s, i) => (
+              <div className="achievement-stat" key={i}>
+                <div className="achievement-stat-number" data-target={s.value} data-suffix={s.suffix}>0</div>
+                <div className="achievement-stat-label">{s.label}</div>
+                <div className="radial-burst">
+                  {Array.from({length: 8}).map((_, j) => (
+                    <span key={j} style={{ transform: `rotate(${j*45}deg) translateY(-30px)` }}></span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="achievement-cards">
+            {ACHIEVEMENT_CARDS.map((a, i) => (
+              <div className="achievement-card" key={i}>
+                <i className={a.icon}></i>
+                <div>
+                  <div className="achievement-card-title">{a.title}</div>
+                  <div className="achievement-card-desc">{a.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ===== EXPERIENCE ===== */}
+        <section id="experience" className="experience-section">
+          <span className="section-label">// 06. MISSION HISTORY</span>
+          <h2 className="section-heading">Experience</h2>
+          <div className="experience-timeline">
+            <svg className="experience-svg-line" width="40" height="100%" preserveAspectRatio="none">
+              <path className="exp-svg-path" d="M20,0 L20,2000" fill="none" stroke="hsl(195,100%,50%)" strokeWidth="2" style={{ filter: 'drop-shadow(0 0 4px hsl(195,100%,50%,0.5))' }} />
+            </svg>
+            {EXPERIENCE.map((exp, i) => (
+              <div className="experience-entry" key={i}>
+                <div className="exp-card">
+                  <div className="exp-date">{exp.date}</div>
+                  <div className="exp-role">{exp.role}</div>
+                  <div className="exp-company">{exp.company}</div>
+                  <ul className="exp-bullets">
+                    {exp.bullets.map((b, j) => <li key={j}>{b}</li>)}
+                  </ul>
+                  <span className={`exp-status ${exp.status}`}>{exp.statusText}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ===== CONTACT ===== */}
+        <section id="contact" className="contact-section">
+          <span className="section-label">// 07. ESTABLISH CONNECTION</span>
+          <h2 className="section-heading">Contact <span className="accent">Me</span></h2>
+          <div className="contact-grid">
+            <div>
+              <div className="radar-container">
+                <div className="radar-circle"></div>
+                <div className="radar-circle"></div>
+                <div className="radar-circle"></div>
+                <div className="radar-circle"></div>
+                <div className="radar-circle"></div>
+                <div className="radar-sweep"></div>
+                <div className="radar-blip" style={{ top: '30%', left: '60%', animationDelay: '0.5s' }}></div>
+                <div className="radar-blip" style={{ top: '65%', left: '35%', animationDelay: '1.2s' }}></div>
+                <div className="radar-blip" style={{ top: '45%', left: '72%', animationDelay: '2s' }}></div>
+              </div>
+              <div className="contact-links">
+                {[
+                  { icon: "fa-brands fa-github", text: "github.com/alexchen" },
+                  { icon: "fa-brands fa-linkedin", text: "linkedin.com/in/alexchen" },
+                  { icon: "fa-brands fa-x-twitter", text: "twitter.com/alexchendev" },
+                  { icon: "fa-brands fa-instagram", text: "instagram.com/alexchen" },
+                  { icon: "fa-solid fa-envelope", text: "alex@chendev.com" },
+                  { icon: "fa-solid fa-code", text: "leetcode.com/alexchen" },
+                  { icon: "fa-solid fa-globe", text: "alexchen.dev" },
+                ].map((l, i) => (
+                  <a className="contact-link-row" href="#" key={i}>
+                    <i className={l.icon}></i>
+                    <span className="separator">::</span>
+                    <span>{l.text}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+            <form className="contact-form" onSubmit={handleSubmit}>
+              <div className="form-field">
+                <span className="prefix">{">>"} YOUR NAME:</span>
+                <input type="text" required placeholder="John Doe" />
+              </div>
+              <div className="form-field">
+                <span className="prefix">{">>"} EMAIL:</span>
+                <input type="email" required placeholder="john@example.com" />
+              </div>
+              <div className="form-field">
+                <span className="prefix">{">>"} MESSAGE:</span>
+                <textarea required placeholder="Let's collaborate..." rows={4}></textarea>
+              </div>
+              <button type="submit" className={`btn-transmit ${formSent ? 'sent' : ''}`}>
+                {formSent ? '✓ SIGNAL TRANSMITTED' : '[[ TRANSMIT SIGNAL ]]'}
+              </button>
+            </form>
+          </div>
+        </section>
+
+        {/* ===== FOOTER ===== */}
+        <footer className="footer">
+          <div className="footer-logo">ALEX CHEN</div>
+          <SocialIcons />
+          <div className="footer-status">[ ALL SYSTEMS NOMINAL ]</div>
+          <div className="footer-copy">© 2025 Alex Chen. Built with ♥ and code.</div>
+        </footer>
+      </div>
+
+      {/* BACK TO TOP */}
+      <button className={`back-to-top ${showBackTop ? 'visible' : ''}`} onClick={() => gsap.to(window, { scrollTo: { y: 0 }, duration: 1.5, ease: "power4.inOut" })} aria-label="Back to top">
+        <i className="fa-solid fa-arrow-up"></i>
+      </button>
+    </>
+  );
+}
