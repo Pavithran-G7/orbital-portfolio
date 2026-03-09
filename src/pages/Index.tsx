@@ -751,40 +751,6 @@ export default function Index() {
     setTimeout(() => setFormSent(false), 3000);
   };
 
-  const SocialIconButtons = ({ className = "", size = "" }: { className?: string; size?: string }) => (
-    <div className={`social-icons-btns ${className}`}>
-      {SOCIAL_ICONS.map(s => (
-        <a key={s.tooltip} href={s.url} className={`social-icon-btn ${size}`} data-tooltip={s.tooltip} aria-label={s.tooltip}>
-          <i className={s.icon}></i>
-        </a>
-      ))}
-    </div>
-  );
-
-  const SectionDivider = () => (
-    <div className="section-divider"></div>
-  );
-
-  const SplitWords = ({ text, className = "" }: { text: string; className?: string }) => (
-    <span className={className}>
-      {text.split(" ").map((w, i) => (
-        <span className="word" key={i}><span className="word-inner">{w}</span>&nbsp;</span>
-      ))}
-    </span>
-  );
-
-  const SectionHeading = ({ number, label, title, accent }: { number: string; label: string; title: string; accent: string }) => (
-    <div className="section-heading-wrap">
-      <span className="section-label">
-        <span className="label-line"></span>
-        <span className="label-number">{number}</span>
-        {label}
-      </span>
-      <h2 className="section-heading">{title} <span className="accent">{accent}</span></h2>
-      <div className="heading-underline"></div>
-    </div>
-  );
-
   const getCategoryTint = (cat: string) => {
     switch (cat) {
       case 'FRONTEND': return 'hex-frontend';
