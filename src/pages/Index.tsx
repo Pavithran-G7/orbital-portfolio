@@ -534,7 +534,6 @@ export default function Index() {
     gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, TextPlugin);
 
     requestAnimationFrame(() => {
-      Splitting({ target: '[data-splitting]', by: 'words' });
 
       // ---- HERO ----
       const roleEl = heroRoleRef.current;
