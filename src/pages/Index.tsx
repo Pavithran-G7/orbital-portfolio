@@ -650,7 +650,6 @@ export default function Index() {
             <li key={id}><a className={activeNav === id ? 'active' : ''} onClick={() => scrollToSection(id)}>{id}</a></li>
           ))}
         </ul>
-        <SocialIcons />
         <div className={`hamburger ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           <span/><span/><span/>
         </div>
