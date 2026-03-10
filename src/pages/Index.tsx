@@ -65,9 +65,6 @@ const SOCIAL_ICONS = [
   { icon: "fa-brands fa-github", url: "#", tooltip: "GitHub" },
   { icon: "fa-brands fa-linkedin", url: "#", tooltip: "LinkedIn" },
   { icon: "fa-brands fa-x-twitter", url: "#", tooltip: "Twitter/X" },
-  { icon: "fa-brands fa-instagram", url: "#", tooltip: "Instagram" },
-  { icon: "fa-brands fa-free-code-camp", url: "#", tooltip: "LeetCode" },
-  { icon: "fa-solid fa-envelope", url: "#", tooltip: "Email" },
 ];
 
 export default function Index() {
