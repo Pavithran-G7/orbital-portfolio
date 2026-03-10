@@ -160,6 +160,8 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
 
 export default function Index() {
   const [loaded, setLoaded] = useState(false);
+  const [doorOpen, setDoorOpen] = useState(false);
+  const [doorsGone, setDoorsGone] = useState(false);
   const [navScrolled, setNavScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -187,7 +189,13 @@ export default function Index() {
       .to(loaderTextRef.current, { duration: 1.0, text: "INITIALIZING PORTFOLIO SYSTEMS...", ease: "none" }, 0.9)
       .call(() => { if (loaderBarRef.current) loaderBarRef.current.style.width = "100%"; }, [], 1.9)
       .to("#loader > *", { opacity: 0, duration: 0.4 }, 2.7)
-      .call(() => setLoaded(true), [], 3.1);
+      .call(() => {
+        setLoaded(true);
+        // Start door open animation after loader hides
+        setTimeout(() => setDoorOpen(true), 100);
+        // Remove door panels after animation completes
+        setTimeout(() => setDoorsGone(true), 1200);
+      }, [], 3.1);
   }, []);
 
   // ===== BACKGROUND REMOVED FOR SIMPLICITY =====
@@ -615,6 +623,14 @@ export default function Index() {
         <div className="loader-text"><span ref={loaderTextRef}></span></div>
         <div className="loader-progress"><div className="loader-progress-bar" ref={loaderBarRef}></div></div>
       </div>
+
+      {/* DOOR REVEAL */}
+      {!doorsGone && (
+        <div className="door-overlay">
+          <div className={`door-panel door-left ${doorOpen ? 'open' : ''}`}></div>
+          <div className={`door-panel door-right ${doorOpen ? 'open' : ''}`}></div>
+        </div>
+      )}
 
       {/* CURSORS */}
       <div className="cursor-ring" ref={cursorRingRef}></div>

@@ -84,6 +84,30 @@ body {
   box-shadow: 0 0 10px hsl(var(--accent-ice) / 0.5); transition: width 0.8s ease-out;
 }
 
+/* ===== DOOR REVEAL ANIMATION ===== */
+.door-overlay {
+  position: fixed; inset: 0; z-index: 9998;
+  pointer-events: none;
+}
+.door-panel {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  background: hsl(var(--bg-void));
+  transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1);
+  will-change: transform;
+}
+.door-left { left: 0; transform: translateX(0); }
+.door-right { right: 0; transform: translateX(0); }
+.door-left.open { transform: translateX(-100%); }
+.door-right.open { transform: translateX(100%); }
+.door-panel::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0; width: 2px;
+  background: hsl(var(--accent-ice));
+  box-shadow: 0 0 15px hsl(var(--accent-ice) / 0.6), 0 0 30px hsl(var(--accent-ice) / 0.3);
+}
+.door-left::after { right: 0; }
+.door-right::after { left: 0; }
+
 /* ===== CUSTOM CURSOR ===== */
 .cursor-ring {
   position: fixed; width: 32px; height: 32px;
@@ -258,7 +282,7 @@ section { min-height: auto; padding: 80px 5vw 60px; position: relative; }
 /* ===== HERO ===== */
 .hero-section {
   display: flex; align-items: center; justify-content: space-between;
-  min-height: 100vh !important; padding-top: 80px; gap: 40px;
+  min-height: 100vh !important; padding-top: 72px; padding-bottom: 40px; gap: 40px;
 }
 .hero-text { flex: 1; max-width: 600px; }
 
