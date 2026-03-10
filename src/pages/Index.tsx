@@ -160,6 +160,8 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
 
 export default function Index() {
   const [loaded, setLoaded] = useState(false);
+  const [doorOpen, setDoorOpen] = useState(false);
+  const [doorsGone, setDoorsGone] = useState(false);
   const [navScrolled, setNavScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
