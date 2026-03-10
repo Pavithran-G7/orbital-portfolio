@@ -160,7 +160,7 @@ export default function Index() {
   const [formSent, setFormSent] = useState(false);
   const [popupProject, setPopupProject] = useState<typeof PROJECTS[0] | null>(null);
 
-  const bgCanvasRef = useRef<HTMLCanvasElement>(null);
+  // bgCanvasRef removed — no particle background
   const heroCanvasRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
