@@ -614,17 +614,17 @@ export default function Index() {
         });
       });
 
-      // ---- CONTACT: Scale + spring ----
-      gsap.from('.radar-container', {
-        scale: 0, duration: 1, ease: "elastic.out(1, 0.5)",
+      // ---- CONTACT: Smooth entrance ----
+      gsap.from('.contact-info', {
+        x: -60, opacity: 0, duration: 0.9, ease: "power3.out",
         scrollTrigger: { trigger: ".contact-section", start: "top 70%", toggleActions: "play none none reverse" }
       });
       gsap.from('.contact-form', {
-        y: 80, opacity: 0, duration: 0.8, delay: 0.2, ease: "power3.out",
+        x: 60, opacity: 0, duration: 0.9, delay: 0.15, ease: "power3.out",
         scrollTrigger: { trigger: ".contact-section", start: "top 70%", toggleActions: "play none none reverse" }
       });
       gsap.from('.contact-link-row', {
-        x: -40, opacity: 0, stagger: 0.06, duration: 0.6, ease: "power3.out",
+        y: 20, opacity: 0, stagger: 0.08, duration: 0.6, delay: 0.3, ease: "power3.out",
         scrollTrigger: { trigger: ".contact-links", start: "top 85%", toggleActions: "play none none reverse" }
       });
 
