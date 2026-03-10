@@ -725,31 +725,31 @@ section {
 
 /* ===== PROJECTS ===== */
 .projects-section {
-  padding: 120px 0 80px;
-  overflow: hidden;
+  padding: 120px 0 0;
+  overflow: visible;
 }
 .projects-section .section-heading,
 .projects-section .section-label {
   padding: 0 5vw;
+  margin-bottom: 8px;
 }
 
 .projects-track {
   display: flex;
   gap: 32px;
-  padding: 0 5vw;
-  perspective: 1200px;
+  padding: 40px 5vw;
+  align-items: stretch;
 }
 
 .project-card {
   flex: 0 0 380px;
-  height: 500px;
+  min-height: 480px;
   background: hsl(var(--bg-surface) / 0.7);
   border: 1px solid hsl(var(--border-line) / 0.4);
   display: flex;
   flex-direction: column;
   transition: transform 0.4s, box-shadow 0.4s;
   will-change: transform;
-  overflow: hidden;
 }
 .project-card:hover {
   transform: translateY(-10px);
