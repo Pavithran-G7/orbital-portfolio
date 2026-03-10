@@ -73,7 +73,7 @@ const SOCIAL_ICONS = [
   { icon: "fa-brands fa-x-twitter", url: "#", tooltip: "Twitter/X" },
 ];
 
-const PROJECT_CARD_WIDTH = 400;
+const PROJECT_CARD_WIDTH = 480;
 const PROJECT_GAP = 32;
 
 function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: typeof PROJECTS; onProjectClick: (p: typeof PROJECTS[0]) => void }) {
@@ -83,14 +83,15 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
     offset: ["start start", "end end"],
   });
 
-  const totalDistance = (projects.length - 1) * (PROJECT_CARD_WIDTH + PROJECT_GAP);
-  const x = useTransform(scrollYProgress, [0, 1], [0, -totalDistance]);
+  // Calculate total distance: all cards + gaps, minus one viewport width so last card ends at right edge
+  const totalDistance = projects.length * (PROJECT_CARD_WIDTH + PROJECT_GAP);
+  const x = useTransform(scrollYProgress, [0, 1], [0, -totalDistance + (typeof window !== 'undefined' ? window.innerWidth - 80 : 800)]);
 
   return (
     <section
       id="projects"
       ref={containerRef}
-      style={{ height: `${projects.length * 100}vh`, position: 'relative' }}
+      style={{ height: `${(projects.length + 1) * 100}vh`, position: 'relative' }}
     >
       <div
         style={{
@@ -159,7 +160,7 @@ export default function Index() {
   const [formSent, setFormSent] = useState(false);
   const [popupProject, setPopupProject] = useState<typeof PROJECTS[0] | null>(null);
 
-  const bgCanvasRef = useRef<HTMLCanvasElement>(null);
+  // bgCanvasRef removed — no particle background
   const heroCanvasRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
@@ -181,111 +182,7 @@ export default function Index() {
       .call(() => setLoaded(true), [], 3.1);
   }, []);
 
-  // ===== THREE.JS BACKGROUND =====
-  useEffect(() => {
-    if (!bgCanvasRef.current) return;
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 3000);
-    camera.position.z = 400;
-    const renderer = new THREE.WebGLRenderer({ canvas: bgCanvasRef.current, antialias: true, alpha: true, powerPreference: "high-performance" });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    const isMobile = window.innerWidth <= 768;
-    const starCount = isMobile ? 1500 : 6000;
-
-    const starGeo = new THREE.BufferGeometry();
-    const positions = new Float32Array(starCount * 3);
-    const colors = new Float32Array(starCount * 3);
-    const sizes = new Float32Array(starCount);
-    for (let i = 0; i < starCount; i++) {
-      positions[i*3] = (Math.random()-0.5)*2000;
-      positions[i*3+1] = (Math.random()-0.5)*2000;
-      positions[i*3+2] = (Math.random()-0.5)*2000;
-      const isIce = Math.random() > 0.7;
-      colors[i*3] = isIce ? 0 : 0.78;
-      colors[i*3+1] = isIce ? 0.76 : 0.91;
-      colors[i*3+2] = 1;
-      sizes[i] = Math.random() > 0.5 ? 2.0 : 0.8;
-    }
-    starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    starGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    starGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    const starMat = new THREE.PointsMaterial({ size: 1.5, vertexColors: true, transparent: true, opacity: 0.8, sizeAttenuation: true });
-    const stars = new THREE.Points(starGeo, starMat);
-    scene.add(stars);
-
-    const drifters: any[] = [];
-    const drifterMeshes: any[] = [];
-    const geos = [
-      new THREE.IcosahedronGeometry(20, 1),
-      new THREE.IcosahedronGeometry(28, 1),
-      new THREE.TorusGeometry(22, 1.5, 8, 32),
-      new THREE.TorusGeometry(18, 1.2, 8, 32),
-      new THREE.OctahedronGeometry(18, 0),
-    ];
-    geos.forEach((g, i) => {
-      const mat = new THREE.MeshBasicMaterial({ color: 0x00c2ff, wireframe: true, transparent: true, opacity: 0.12 + Math.random()*0.06 });
-      const m = new THREE.Mesh(g, mat);
-      m.position.set((Math.random()-0.5)*300, (Math.random()-0.5)*200, (Math.random()-0.5)*200);
-      if (i >= 2) m.rotation.z = 0.7;
-      scene.add(m);
-      drifterMeshes.push(m);
-      drifters.push({ mesh: m, driftDir: 1, driftSpeed: 0.005 + Math.random()*0.005, rotSpeed: { x: Math.random()*0.005, y: Math.random()*0.008, z: i===4 ? 0.003 : 0 } });
-    });
-
-    const sceneGroup = new THREE.Group();
-    sceneGroup.add(stars);
-    drifterMeshes.forEach(m => sceneGroup.add(m));
-    scene.add(sceneGroup);
-
-    let targetRotX = 0, targetRotY = 0;
-    const handleMouse = (e: MouseEvent) => {
-      targetRotX = (e.clientY / window.innerHeight - 0.5) * 0.3;
-      targetRotY = (e.clientX / window.innerWidth - 0.5) * 0.3;
-      mousePos.current = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener('mousemove', handleMouse);
-
-    let scrollY = 0;
-    const handleScroll = () => { scrollY = window.scrollY; };
-    window.addEventListener('scroll', handleScroll);
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-      sceneGroup.rotation.x += (targetRotX - sceneGroup.rotation.x) * 0.03;
-      sceneGroup.rotation.y += (targetRotY - sceneGroup.rotation.y) * 0.03;
-      camera.position.z = 400 + scrollY * 0.15;
-      drifters.forEach(d => {
-        d.mesh.rotation.x += d.rotSpeed.x;
-        d.mesh.rotation.y += d.rotSpeed.y;
-        d.mesh.rotation.z += d.rotSpeed.z;
-        d.mesh.position.y += d.driftDir * d.driftSpeed;
-        if (Math.abs(d.mesh.position.y) > 120) d.driftDir *= -1;
-      });
-      const pos = starGeo.attributes.position.array as Float32Array;
-      for (let i = 0; i < starCount; i++) {
-        pos[i*3+1] += Math.sin(Date.now() * 0.0001 + i) * 0.02;
-      }
-      starGeo.attributes.position.needsUpdate = true;
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouse);
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleResize);
-      renderer.dispose();
-    };
-  }, []);
+  // ===== BACKGROUND REMOVED FOR SIMPLICITY =====
 
   // ===== HERO 3D CENTERPIECE =====
   useEffect(() => {
@@ -715,13 +612,8 @@ export default function Index() {
       <div className="cursor-ring" ref={cursorRingRef}></div>
       <div className="cursor-dot" ref={cursorDotRef}></div>
 
-      {/* BG CANVAS */}
-      <canvas id="bg-canvas" ref={bgCanvasRef}></canvas>
-
-      {/* FOG */}
+      {/* FOG — subtle gradient only */}
       <div className="fog-overlay">
-        <div className="fog-blob"></div>
-        <div className="fog-blob"></div>
         <div className="fog-blob"></div>
         <div className="fog-blob"></div>
       </div>
@@ -729,10 +621,6 @@ export default function Index() {
       {/* NAVBAR */}
       <nav className={`navbar ${navScrolled ? 'scrolled' : ''}`}>
         <div className="navbar-inner">
-          <svg className="nav-logo" width="32" height="32" viewBox="0 0 36 36" onClick={() => scrollToSection('home')} style={{ cursor: 'pointer' }}>
-            <polygon points="18,2 34,18 18,34 2,18" fill="none" stroke="hsl(195,100%,50%)" strokeWidth="2"/>
-            <polygon points="18,8 28,18 18,28 8,18" fill="none" stroke="hsl(195,100%,50%)" strokeWidth="1.5" opacity="0.5"/>
-          </svg>
           <ul className="nav-links">
             {NAV_LINKS.map(id => (
               <li key={id}><a className={activeNav === id ? 'active' : ''} onClick={() => scrollToSection(id)}>{id}</a></li>
@@ -755,7 +643,7 @@ export default function Index() {
         <SocialIcons />
       </div>
 
-      {/* PROJECT POPUP */}
+      {/* PROJECT POPUP — clean minimal */}
       {popupProject && (
         <div className="project-popup-overlay" onClick={() => setPopupProject(null)}>
           <div className="project-popup" onClick={e => e.stopPropagation()}>
@@ -764,7 +652,6 @@ export default function Index() {
             </button>
             <img src={popupProject.image} alt={popupProject.title} className="popup-image" />
             <div className="popup-body">
-              <span className="popup-mission">MISSION-{popupProject.id}</span>
               <h3 className="popup-title">{popupProject.title}</h3>
               <p className="popup-desc">{popupProject.longDesc}</p>
               <div className="popup-tech">
@@ -987,18 +874,6 @@ export default function Index() {
 
         {/* ===== FOOTER ===== */}
         <footer className="footer">
-          <div className="footer-brand">
-            <svg width="28" height="28" viewBox="0 0 36 36">
-              <polygon points="18,2 34,18 18,34 2,18" fill="none" stroke="hsl(195,100%,50%)" strokeWidth="2"/>
-              <polygon points="18,8 28,18 18,28 8,18" fill="none" stroke="hsl(195,100%,50%)" strokeWidth="1.5" opacity="0.5"/>
-            </svg>
-            <span>ALEX CHEN</span>
-          </div>
-          <div className="footer-socials">
-            {SOCIAL_ICONS.map(s => (
-              <a key={s.tooltip} href={s.url} aria-label={s.tooltip}><i className={s.icon}></i></a>
-            ))}
-          </div>
           <div className="footer-copy">© 2025 Alex Chen. All rights reserved.</div>
         </footer>
       </div>
