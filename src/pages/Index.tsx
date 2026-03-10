@@ -189,7 +189,13 @@ export default function Index() {
       .to(loaderTextRef.current, { duration: 1.0, text: "INITIALIZING PORTFOLIO SYSTEMS...", ease: "none" }, 0.9)
       .call(() => { if (loaderBarRef.current) loaderBarRef.current.style.width = "100%"; }, [], 1.9)
       .to("#loader > *", { opacity: 0, duration: 0.4 }, 2.7)
-      .call(() => setLoaded(true), [], 3.1);
+      .call(() => {
+        setLoaded(true);
+        // Start door open animation after loader hides
+        setTimeout(() => setDoorOpen(true), 100);
+        // Remove door panels after animation completes
+        setTimeout(() => setDoorsGone(true), 1200);
+      }, [], 3.1);
   }, []);
 
   // ===== BACKGROUND REMOVED FOR SIMPLICITY =====
