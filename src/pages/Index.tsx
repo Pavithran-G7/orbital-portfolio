@@ -65,9 +65,6 @@ const SOCIAL_ICONS = [
   { icon: "fa-brands fa-github", url: "#", tooltip: "GitHub" },
   { icon: "fa-brands fa-linkedin", url: "#", tooltip: "LinkedIn" },
   { icon: "fa-brands fa-x-twitter", url: "#", tooltip: "Twitter/X" },
-  { icon: "fa-brands fa-instagram", url: "#", tooltip: "Instagram" },
-  { icon: "fa-brands fa-free-code-camp", url: "#", tooltip: "LeetCode" },
-  { icon: "fa-solid fa-envelope", url: "#", tooltip: "Email" },
 ];
 
 export default function Index() {
@@ -363,6 +360,62 @@ export default function Index() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // ===== CURSOR-SPEED-BASED MOMENTUM SCROLL =====
+  useEffect(() => {
+    if (window.innerWidth <= 768) return;
+
+    let currentY = window.scrollY;
+    let targetY = currentY;
+    let prevMouseY = 0;
+    let mouseSpeed = 0;
+    let lastMoveTime = 0;
+    const maxScroll = () => document.documentElement.scrollHeight - window.innerHeight;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      // Scale scroll delta by cursor movement speed (min 1x, max 4x)
+      const speedMultiplier = Math.min(4, 1 + mouseSpeed * 0.015);
+      targetY = Math.max(0, Math.min(targetY + e.deltaY * speedMultiplier, maxScroll()));
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      const now = performance.now();
+      const dt = now - lastMoveTime;
+      if (dt > 0 && lastMoveTime > 0) {
+        const dy = Math.abs(e.clientY - prevMouseY);
+        const dx = Math.abs(e.clientX - (mousePos.current?.x || 0));
+        mouseSpeed = Math.sqrt(dx * dx + dy * dy) / dt * 16; // normalize to ~per-frame
+      }
+      prevMouseY = e.clientY;
+      lastMoveTime = now;
+    };
+
+    // Decay mouse speed over time
+    const decayInterval = setInterval(() => {
+      mouseSpeed *= 0.9;
+    }, 50);
+
+    const ease = 0.075;
+    let rafId: number;
+    const smoothLoop = () => {
+      currentY += (targetY - currentY) * ease;
+      window.scrollTo(0, currentY);
+      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.update();
+      rafId = requestAnimationFrame(smoothLoop);
+    };
+    rafId = requestAnimationFrame(smoothLoop);
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('mousemove', onMouseMove);
+      cancelAnimationFrame(rafId);
+      clearInterval(decayInterval);
+    };
+  }, []);
+
   // ===== GSAP ANIMATIONS =====
   useEffect(() => {
     if (!loaded) return;
@@ -653,7 +706,6 @@ export default function Index() {
             <li key={id}><a className={activeNav === id ? 'active' : ''} onClick={() => scrollToSection(id)}>{id}</a></li>
           ))}
         </ul>
-        <SocialIcons />
         <div className={`hamburger ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           <span/><span/><span/>
         </div>
@@ -869,10 +921,6 @@ export default function Index() {
                   { icon: "fa-brands fa-github", text: "github.com/alexchen" },
                   { icon: "fa-brands fa-linkedin", text: "linkedin.com/in/alexchen" },
                   { icon: "fa-brands fa-x-twitter", text: "twitter.com/alexchendev" },
-                  { icon: "fa-brands fa-instagram", text: "instagram.com/alexchen" },
-                  { icon: "fa-solid fa-envelope", text: "alex@chendev.com" },
-                  { icon: "fa-solid fa-code", text: "leetcode.com/alexchen" },
-                  { icon: "fa-solid fa-globe", text: "alexchen.dev" },
                 ].map((l, i) => (
                   <a className="contact-link-row" href="#" key={i}>
                     <i className={l.icon}></i>
