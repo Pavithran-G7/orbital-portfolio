@@ -16,22 +16,29 @@ declare const Splitting: any;
 
 const NAV_LINKS = ["home","about","skills","projects","experience","contact"];
 
+const SKILL_ICONS: Record<string, React.ComponentType<any>> = {
+  "HTML5": Code2, "CSS3": Palette, "JavaScript": Braces, "React": Atom, "Tailwind CSS": Wind,
+  "Node.js": Terminal, "Python": FileCode, "Express.js": Server,
+  "MongoDB": Database, "MySQL": CircuitBoard, "Firebase": Flame,
+  "Git": GitBranch, "GitHub": Github, "Docker": Container, "Figma": Figma,
+};
+
 const SKILLS = [
-  { name: "HTML5", icon: "fa-brands fa-html5", category: "FRONTEND", level: 90, status: "OPERATIONAL" },
-  { name: "CSS3", icon: "fa-brands fa-css3-alt", category: "FRONTEND", level: 85, status: "OPERATIONAL" },
-  { name: "JavaScript", icon: "fa-brands fa-js", category: "FRONTEND", level: 88, status: "OPERATIONAL" },
-  { name: "React", icon: "fa-brands fa-react", category: "FRONTEND", level: 82, status: "ADVANCED" },
-  { name: "Tailwind CSS", icon: "fa-solid fa-wind", category: "FRONTEND", level: 78, status: "OPERATIONAL" },
-  { name: "Node.js", icon: "fa-brands fa-node-js", category: "BACKEND", level: 75, status: "ADVANCED" },
-  { name: "Python", icon: "fa-brands fa-python", category: "BACKEND", level: 80, status: "OPERATIONAL" },
-  { name: "Express.js", icon: "fa-solid fa-server", category: "BACKEND", level: 70, status: "ADVANCED" },
-  { name: "MongoDB", icon: "fa-solid fa-database", category: "DATABASE", level: 72, status: "ADVANCED" },
-  { name: "MySQL", icon: "fa-solid fa-table", category: "DATABASE", level: 68, status: "ADVANCED" },
-  { name: "Firebase", icon: "fa-solid fa-fire", category: "DATABASE", level: 65, status: "LEARNING" },
-  { name: "Git", icon: "fa-brands fa-git-alt", category: "TOOLS", level: 85, status: "OPERATIONAL" },
-  { name: "GitHub", icon: "fa-brands fa-github", category: "TOOLS", level: 88, status: "OPERATIONAL" },
-  { name: "Docker", icon: "fa-brands fa-docker", category: "TOOLS", level: 55, status: "LEARNING" },
-  { name: "Figma", icon: "fa-brands fa-figma", category: "TOOLS", level: 70, status: "ADVANCED" },
+  { name: "HTML5", category: "FRONTEND", level: 90, status: "OPERATIONAL" },
+  { name: "CSS3", category: "FRONTEND", level: 85, status: "OPERATIONAL" },
+  { name: "JavaScript", category: "FRONTEND", level: 88, status: "OPERATIONAL" },
+  { name: "React", category: "FRONTEND", level: 82, status: "ADVANCED" },
+  { name: "Tailwind CSS", category: "FRONTEND", level: 78, status: "OPERATIONAL" },
+  { name: "Node.js", category: "BACKEND", level: 75, status: "ADVANCED" },
+  { name: "Python", category: "BACKEND", level: 80, status: "OPERATIONAL" },
+  { name: "Express.js", category: "BACKEND", level: 70, status: "ADVANCED" },
+  { name: "MongoDB", category: "DATABASE", level: 72, status: "ADVANCED" },
+  { name: "MySQL", category: "DATABASE", level: 68, status: "ADVANCED" },
+  { name: "Firebase", category: "DATABASE", level: 65, status: "LEARNING" },
+  { name: "Git", category: "TOOLS", level: 85, status: "OPERATIONAL" },
+  { name: "GitHub", category: "TOOLS", level: 88, status: "OPERATIONAL" },
+  { name: "Docker", category: "TOOLS", level: 55, status: "LEARNING" },
+  { name: "Figma", category: "TOOLS", level: 70, status: "ADVANCED" },
 ];
 
 const PROJECTS = [
