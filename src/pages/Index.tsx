@@ -737,15 +737,18 @@ export default function Index() {
           <span className="section-label">// 02. TECH ARSENAL</span>
           <h2 className="section-heading" data-splitting>My <span className="accent">Skills</span></h2>
           <div className="skills-grid">
-            {SKILLS.map(skill => (
-              <div className="skill-card" key={skill.name} onMouseMove={handleSkillMouseMove} onMouseLeave={handleSkillMouseLeave}>
-                <div className="skill-icon"><i className={skill.icon}></i></div>
-                <div className="skill-name">{skill.name}</div>
-                <div className="skill-category">{skill.category}</div>
-                <div className="skill-bar"><div className="skill-bar-fill" data-level={skill.level}></div></div>
-                <div className="skill-status">{skill.status}</div>
-              </div>
-            ))}
+            {SKILLS.map(skill => {
+              const IconComp = SKILL_ICONS[skill.name] || Code2;
+              return (
+                <div className="skill-card" key={skill.name} onMouseMove={handleSkillMouseMove} onMouseLeave={handleSkillMouseLeave}>
+                  <div className="skill-icon"><IconComp size={28} /></div>
+                  <div className="skill-name">{skill.name}</div>
+                  <div className="skill-category">{skill.category}</div>
+                  <div className="skill-bar"><div className="skill-bar-fill" data-level={skill.level}></div></div>
+                  <div className="skill-status">{skill.status}</div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
