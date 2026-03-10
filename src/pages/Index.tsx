@@ -507,19 +507,7 @@ export default function Index() {
         });
       });
 
-      // ---- PROJECTS ----
-      const track = document.querySelector('.projects-track') as HTMLElement;
-      if (track) {
-        const getScrollAmount = () => -(track.scrollWidth - window.innerWidth);
-        gsap.to(track, {
-          x: getScrollAmount, ease: "none",
-          scrollTrigger: {
-            trigger: ".projects-section", start: "top top",
-            end: () => "+=" + (track.scrollWidth - window.innerWidth),
-            pin: true, scrub: 1.2, anticipatePin: 1, invalidateOnRefresh: true,
-          }
-        });
-      }
+      // ---- PROJECTS (handled by framer-motion) ----
 
       // ---- EDUCATION ----
       document.querySelectorAll('.education-card').forEach(card => {
