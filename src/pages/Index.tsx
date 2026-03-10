@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
 import project001 from "@/assets/project-001.jpg";
 import project002 from "@/assets/project-002.jpg";
 import project003 from "@/assets/project-003.jpg";
@@ -71,6 +72,82 @@ const SOCIAL_ICONS = [
   { icon: "fa-brands fa-linkedin", url: "#", tooltip: "LinkedIn" },
   { icon: "fa-brands fa-x-twitter", url: "#", tooltip: "Twitter/X" },
 ];
+
+const PROJECT_CARD_WIDTH = 400;
+const PROJECT_GAP = 32;
+
+function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: typeof PROJECTS; onProjectClick: (p: typeof PROJECTS[0]) => void }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  const totalDistance = (projects.length - 1) * (PROJECT_CARD_WIDTH + PROJECT_GAP);
+  const x = useTransform(scrollYProgress, [0, 1], [0, -totalDistance]);
+
+  return (
+    <section
+      id="projects"
+      ref={containerRef}
+      style={{ height: `${projects.length * 100}vh`, position: 'relative' }}
+    >
+      <div
+        style={{
+          position: 'sticky',
+          top: 0,
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          padding: '0 5vw',
+        }}
+      >
+        <span className="section-label" style={{ marginBottom: 12 }}>// 03. MISSION LOG</span>
+        <h2 className="section-heading" style={{ marginBottom: 40 }}>Featured <span className="accent">Projects</span></h2>
+        <motion.div
+          style={{
+            x,
+            display: 'flex',
+            gap: `${PROJECT_GAP}px`,
+          }}
+        >
+          {projects.map((p, i) => (
+            <motion.div
+              className="project-card"
+              key={p.id}
+              style={{ flex: `0 0 ${PROJECT_CARD_WIDTH}px` }}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              viewport={{ once: true }}
+            >
+              <div className="project-visual" onClick={() => onProjectClick(p)} style={{ cursor: 'pointer' }}>
+                <img src={p.image} alt={p.title} className="project-image" loading="lazy" />
+                <div className="project-image-overlay">
+                  <i className="fa-solid fa-expand"></i>
+                </div>
+                <div className="project-mission">MISSION-{p.id}</div>
+              </div>
+              <div className="project-content">
+                <div className="project-title">{p.title}</div>
+                <div className="project-desc">{p.desc}</div>
+                <div className="project-tech">
+                  {p.tech.map(t => <span key={t}>{t}</span>)}
+                </div>
+                <div className="project-links">
+                  <a href="#">↗ LIVE DEMO</a>
+                  <a href="#">{"</>"} SOURCE CODE</a>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
 
 export default function Index() {
   const [loaded, setLoaded] = useState(false);
@@ -302,8 +379,8 @@ export default function Index() {
     const up = () => { ring.classList.remove('clicking'); dot.classList.remove('clicking'); };
 
     const lerpLoop = () => {
-      ringPos.current.x += (mousePos.current.x - ringPos.current.x) * 0.10;
-      ringPos.current.y += (mousePos.current.y - ringPos.current.y) * 0.10;
+      ringPos.current.x += (mousePos.current.x - ringPos.current.x) * 0.18;
+      ringPos.current.y += (mousePos.current.y - ringPos.current.y) * 0.18;
       ring.style.left = ringPos.current.x + 'px';
       ring.style.top = ringPos.current.y + 'px';
       requestAnimationFrame(lerpLoop);
@@ -506,19 +583,7 @@ export default function Index() {
         });
       });
 
-      // ---- PROJECTS ----
-      const track = document.querySelector('.projects-track') as HTMLElement;
-      if (track) {
-        const getScrollAmount = () => -(track.scrollWidth - window.innerWidth);
-        gsap.to(track, {
-          x: getScrollAmount, ease: "none",
-          scrollTrigger: {
-            trigger: ".projects-section", start: "top top",
-            end: () => "+=" + (track.scrollWidth - window.innerWidth),
-            pin: true, scrub: 1.2, anticipatePin: 1, invalidateOnRefresh: true,
-          }
-        });
-      }
+      // ---- PROJECTS (handled by framer-motion) ----
 
       // ---- EDUCATION ----
       document.querySelectorAll('.education-card').forEach(card => {
@@ -790,34 +855,7 @@ export default function Index() {
         </section>
 
         {/* ===== PROJECTS ===== */}
-        <section className="projects-section" id="projects">
-          <span className="section-label">// 03. MISSION LOG</span>
-          <h2 className="section-heading">Featured <span className="accent">Projects</span></h2>
-          <div className="projects-track">
-            {PROJECTS.map(p => (
-              <div className="project-card" key={p.id}>
-                <div className="project-visual" onClick={() => setPopupProject(p)} style={{ cursor: 'pointer' }}>
-                  <img src={p.image} alt={p.title} className="project-image" loading="lazy" />
-                  <div className="project-image-overlay">
-                    <i className="fa-solid fa-expand"></i>
-                  </div>
-                  <div className="project-mission">MISSION-{p.id}</div>
-                </div>
-                <div className="project-content">
-                  <div className="project-title">{p.title}</div>
-                  <div className="project-desc">{p.desc}</div>
-                  <div className="project-tech">
-                    {p.tech.map(t => <span key={t}>{t}</span>)}
-                  </div>
-                  <div className="project-links">
-                    <a href="#">↗ LIVE DEMO</a>
-                    <a href="#">{"</>"} SOURCE CODE</a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <ProjectsHorizontalScroll projects={PROJECTS} onProjectClick={setPopupProject} />
 
         {/* ===== EDUCATION ===== */}
         <section id="education" className="education-section">
