@@ -779,34 +779,7 @@ export default function Index() {
         </section>
 
         {/* ===== PROJECTS ===== */}
-        <section className="projects-section" id="projects">
-          <span className="section-label">// 03. MISSION LOG</span>
-          <h2 className="section-heading">Featured <span className="accent">Projects</span></h2>
-          <div className="projects-track">
-            {PROJECTS.map(p => (
-              <div className="project-card" key={p.id}>
-                <div className="project-visual" onClick={() => setPopupProject(p)} style={{ cursor: 'pointer' }}>
-                  <img src={p.image} alt={p.title} className="project-image" loading="lazy" />
-                  <div className="project-image-overlay">
-                    <i className="fa-solid fa-expand"></i>
-                  </div>
-                  <div className="project-mission">MISSION-{p.id}</div>
-                </div>
-                <div className="project-content">
-                  <div className="project-title">{p.title}</div>
-                  <div className="project-desc">{p.desc}</div>
-                  <div className="project-tech">
-                    {p.tech.map(t => <span key={t}>{t}</span>)}
-                  </div>
-                  <div className="project-links">
-                    <a href="#">↗ LIVE DEMO</a>
-                    <a href="#">{"</>"} SOURCE CODE</a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <ProjectsHorizontalScroll projects={PROJECTS} onProjectClick={setPopupProject} />
 
         {/* ===== EDUCATION ===== */}
         <section id="education" className="education-section">
