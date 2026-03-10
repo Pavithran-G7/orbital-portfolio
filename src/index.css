@@ -439,7 +439,7 @@ section { min-height: 100vh; padding: 120px 5vw 80px; position: relative; }
 .projects-section { padding: 0; overflow: visible; }
 
 .project-card {
-  flex: 0 0 380px; min-height: 480px;
+  min-height: auto;
   background: hsl(var(--bg-surface) / 0.7); border: 1px solid hsl(var(--border-line) / 0.4);
   display: flex; flex-direction: column;
   transition: transform 0.4s, box-shadow 0.4s; will-change: transform;
