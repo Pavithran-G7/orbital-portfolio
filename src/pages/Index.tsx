@@ -573,10 +573,17 @@ export default function Index() {
     e.currentTarget.style.transform = '';
   }, []);
 
-  const scrollToSection = (id: string) => {
-    gsap.to(window, { scrollTo: { y: `#${id}`, offsetY: 64 }, duration: 1.5, ease: "power4.inOut" });
+  const scrollToSection = useCallback((id: string) => {
+    const section = document.getElementById(id);
+    if (!section) return;
+
+    const offset = id === "home" ? 0 : NAVBAR_HEIGHT;
+    const top = Math.max(section.getBoundingClientRect().top + window.scrollY - offset, 0);
+    window.history.replaceState(null, "", id === "home" ? window.location.pathname : `#${id}`);
+    window.scrollTo({ top, behavior: "smooth" });
     setMobileMenuOpen(false);
-  };
+  }, []);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
