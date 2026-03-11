@@ -271,7 +271,12 @@ body {
 /* ===== SECTIONS ===== */
 .content-wrapper { position: relative; z-index: 1; }
 
-section { min-height: auto; padding: 80px 5vw 60px; position: relative; }
+section {
+  min-height: auto;
+  padding: 80px 5vw 60px;
+  position: relative;
+  scroll-margin-top: 72px;
+}
 
 .section-heading {
   font-family: var(--font-display); font-size: clamp(28px, 4vw, 48px);
