@@ -83,42 +83,72 @@ const SOCIAL_ICONS = [
 
 const PROJECT_CARD_WIDTH = 480;
 const PROJECT_GAP = 32;
+const NAVBAR_HEIGHT = 72;
 
 function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: typeof PROJECTS; onProjectClick: (p: typeof PROJECTS[0]) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [layout, setLayout] = useState({
+    cardWidth: PROJECT_CARD_WIDTH,
+    sectionHeight: typeof window !== "undefined" ? window.innerHeight : 1200,
+    translateDistance: 0,
+  });
+
+  useEffect(() => {
+    const updateLayout = () => {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const cardWidth = viewportWidth <= 768
+        ? Math.min(320, Math.max(viewportWidth - 48, 260))
+        : PROJECT_CARD_WIDTH;
+      const horizontalPadding = viewportWidth * 0.1;
+      const visibleTrackWidth = Math.max(viewportWidth - horizontalPadding, cardWidth);
+      const totalTrackWidth = projects.length * cardWidth + Math.max(projects.length - 1, 0) * PROJECT_GAP;
+      const translateDistance = Math.max(totalTrackWidth - visibleTrackWidth, 0);
+
+      setLayout({
+        cardWidth,
+        sectionHeight: viewportHeight + translateDistance,
+        translateDistance,
+      });
+    };
+
+    updateLayout();
+    window.addEventListener("resize", updateLayout);
+    return () => window.removeEventListener("resize", updateLayout);
+  }, [projects.length]);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // Calculate total distance: all cards + gaps, minus one viewport width so last card ends at right edge
-  const totalDistance = projects.length * (PROJECT_CARD_WIDTH + PROJECT_GAP);
-  const x = useTransform(scrollYProgress, [0, 1], [0, -totalDistance + (typeof window !== 'undefined' ? window.innerWidth - 80 : 800)]);
+  const x = useTransform(scrollYProgress, [0, 1], [0, -layout.translateDistance]);
 
   return (
     <section
       id="projects"
       ref={containerRef}
-      style={{ height: `${(projects.length + 1) * 80}vh`, position: 'relative' }}
+      className="projects-section"
+      style={{ height: `${Math.ceil(layout.sectionHeight)}px`, position: "relative" }}
     >
       <div
         style={{
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          padding: '0 5vw',
+          position: "sticky",
+          top: `${NAVBAR_HEIGHT}px`,
+          height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          overflow: "hidden",
+          padding: "0 5vw",
         }}
       >
         <span className="section-label" style={{ marginBottom: 12 }}>// 03. MISSION LOG</span>
-        <h2 className="section-heading" style={{ marginBottom: 40 }}>Featured <span className="accent">Projects</span></h2>
+        <h2 className="section-heading" style={{ marginBottom: 32 }}>Featured <span className="accent">Projects</span></h2>
         <motion.div
           style={{
             x,
-            display: 'flex',
+            display: "flex",
             gap: `${PROJECT_GAP}px`,
           }}
         >
@@ -126,13 +156,13 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
             <motion.div
               className="project-card"
               key={p.id}
-              style={{ flex: `0 0 ${PROJECT_CARD_WIDTH}px` }}
+              style={{ flex: `0 0 ${layout.cardWidth}px` }}
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
               viewport={{ once: true }}
             >
-              <div className="project-visual" onClick={() => onProjectClick(p)} style={{ cursor: 'pointer' }}>
+              <div className="project-visual" onClick={() => onProjectClick(p)} style={{ cursor: "pointer" }}>
                 <img src={p.image} alt={p.title} className="project-image" loading="lazy" />
                 <div className="project-image-overlay">
                   <i className="fa-solid fa-expand"></i>
@@ -344,57 +374,8 @@ export default function Index() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // ===== CURSOR-SPEED-BASED MOMENTUM SCROLL =====
-  useEffect(() => {
-    if (window.innerWidth <= 768) return;
+  // Native browser scrolling keeps section transitions precise and stable.
 
-    let currentY = window.scrollY;
-    let targetY = currentY;
-    let prevMouseY = 0;
-    let mouseSpeed = 0;
-    let lastMoveTime = 0;
-    const maxScroll = () => document.documentElement.scrollHeight - window.innerHeight;
-
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const speedMultiplier = Math.min(4, 1 + mouseSpeed * 0.015);
-      targetY = Math.max(0, Math.min(targetY + e.deltaY * speedMultiplier, maxScroll()));
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      const now = performance.now();
-      const dt = now - lastMoveTime;
-      if (dt > 0 && lastMoveTime > 0) {
-        const dy = Math.abs(e.clientY - prevMouseY);
-        const dx = Math.abs(e.clientX - (mousePos.current?.x || 0));
-        mouseSpeed = Math.sqrt(dx * dx + dy * dy) / dt * 16;
-      }
-      prevMouseY = e.clientY;
-      lastMoveTime = now;
-    };
-
-    const decayInterval = setInterval(() => { mouseSpeed *= 0.9; }, 50);
-
-    const ease = 0.075;
-    let rafId: number;
-    const smoothLoop = () => {
-      currentY += (targetY - currentY) * ease;
-      window.scrollTo(0, currentY);
-      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.update();
-      rafId = requestAnimationFrame(smoothLoop);
-    };
-    rafId = requestAnimationFrame(smoothLoop);
-
-    window.addEventListener('wheel', onWheel, { passive: false });
-    window.addEventListener('mousemove', onMouseMove, { passive: true });
-
-    return () => {
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('mousemove', onMouseMove);
-      cancelAnimationFrame(rafId);
-      clearInterval(decayInterval);
-    };
-  }, []);
 
   // ===== GSAP ANIMATIONS =====
   useEffect(() => {
@@ -592,10 +573,31 @@ export default function Index() {
     e.currentTarget.style.transform = '';
   }, []);
 
-  const scrollToSection = (id: string) => {
-    gsap.to(window, { scrollTo: { y: `#${id}`, offsetY: 64 }, duration: 1.5, ease: "power4.inOut" });
+  const scrollToSection = useCallback((id: string, smooth = true) => {
+    const section = document.getElementById(id);
+    if (!section) return;
+
+    const offset = id === "home" ? 0 : NAVBAR_HEIGHT;
+    const top = Math.max(section.getBoundingClientRect().top + window.scrollY - offset, 0);
+    window.history.replaceState(null, "", id === "home" ? window.location.pathname : `#${id}`);
+    window.scrollTo({ top, behavior: smooth ? "smooth" : "auto" });
     setMobileMenuOpen(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return;
+
+    const alignToHash = () => scrollToSection(hash, false);
+    window.addEventListener("load", alignToHash);
+    const timeout = window.setTimeout(alignToHash, 0);
+
+    return () => {
+      window.removeEventListener("load", alignToHash);
+      window.clearTimeout(timeout);
+    };
+  }, [scrollToSection]);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -649,7 +651,18 @@ export default function Index() {
         <div className="navbar-inner">
           <ul className="nav-links">
             {NAV_LINKS.map(id => (
-              <li key={id}><a className={activeNav === id ? 'active' : ''} onClick={() => scrollToSection(id)}>{id}</a></li>
+              <li key={id}>
+                <a
+                  href={`#${id}`}
+                  className={activeNav === id ? 'active' : ''}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection(id);
+                  }}
+                >
+                  {id}
+                </a>
+              </li>
             ))}
           </ul>
           <div className={`hamburger ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -664,7 +677,16 @@ export default function Index() {
       {/* MOBILE MENU */}
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
         {NAV_LINKS.map(id => (
-          <a key={id} onClick={() => scrollToSection(id)}>{id}</a>
+          <a
+            key={id}
+            href={`#${id}`}
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToSection(id);
+            }}
+          >
+            {id}
+          </a>
         ))}
         <SocialIcons />
       </div>
@@ -701,8 +723,8 @@ export default function Index() {
             <div className="hero-role" ref={heroRoleRef}>&nbsp;</div>
             <div className="hero-tagline" ref={heroTaglineRef}>&nbsp;</div>
             <div className="hero-buttons">
-              <button className="btn-primary" onClick={() => scrollToSection('projects')}>VIEW PROJECTS</button>
-              <button className="btn-secondary" onClick={() => scrollToSection('contact')}>CONTACT ME</button>
+              <a href="#projects" className="btn-primary" onClick={(e) => { e.preventDefault(); scrollToSection('projects'); }}>VIEW PROJECTS</a>
+              <a href="#contact" className="btn-secondary" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }}>CONTACT ME</a>
               <a href="#" className="btn-resume" download>
                 <i className="fa-solid fa-download"></i> DOWNLOAD RESUME
               </a>
