@@ -83,42 +83,72 @@ const SOCIAL_ICONS = [
 
 const PROJECT_CARD_WIDTH = 480;
 const PROJECT_GAP = 32;
+const NAVBAR_HEIGHT = 72;
 
 function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: typeof PROJECTS; onProjectClick: (p: typeof PROJECTS[0]) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [layout, setLayout] = useState({
+    cardWidth: PROJECT_CARD_WIDTH,
+    sectionHeight: typeof window !== "undefined" ? window.innerHeight : 1200,
+    translateDistance: 0,
+  });
+
+  useEffect(() => {
+    const updateLayout = () => {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const cardWidth = viewportWidth <= 768
+        ? Math.min(320, Math.max(viewportWidth - 48, 260))
+        : PROJECT_CARD_WIDTH;
+      const horizontalPadding = viewportWidth * 0.1;
+      const visibleTrackWidth = Math.max(viewportWidth - horizontalPadding, cardWidth);
+      const totalTrackWidth = projects.length * cardWidth + Math.max(projects.length - 1, 0) * PROJECT_GAP;
+      const translateDistance = Math.max(totalTrackWidth - visibleTrackWidth, 0);
+
+      setLayout({
+        cardWidth,
+        sectionHeight: viewportHeight + translateDistance,
+        translateDistance,
+      });
+    };
+
+    updateLayout();
+    window.addEventListener("resize", updateLayout);
+    return () => window.removeEventListener("resize", updateLayout);
+  }, [projects.length]);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // Calculate total distance: all cards + gaps, minus one viewport width so last card ends at right edge
-  const totalDistance = projects.length * (PROJECT_CARD_WIDTH + PROJECT_GAP);
-  const x = useTransform(scrollYProgress, [0, 1], [0, -totalDistance + (typeof window !== 'undefined' ? window.innerWidth - 80 : 800)]);
+  const x = useTransform(scrollYProgress, [0, 1], [0, -layout.translateDistance]);
 
   return (
     <section
       id="projects"
       ref={containerRef}
-      style={{ height: `${(projects.length + 1) * 80}vh`, position: 'relative' }}
+      className="projects-section"
+      style={{ height: `${Math.ceil(layout.sectionHeight)}px`, position: "relative" }}
     >
       <div
         style={{
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          padding: '0 5vw',
+          position: "sticky",
+          top: `${NAVBAR_HEIGHT}px`,
+          height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          overflow: "hidden",
+          padding: "0 5vw",
         }}
       >
         <span className="section-label" style={{ marginBottom: 12 }}>// 03. MISSION LOG</span>
-        <h2 className="section-heading" style={{ marginBottom: 40 }}>Featured <span className="accent">Projects</span></h2>
+        <h2 className="section-heading" style={{ marginBottom: 32 }}>Featured <span className="accent">Projects</span></h2>
         <motion.div
           style={{
             x,
-            display: 'flex',
+            display: "flex",
             gap: `${PROJECT_GAP}px`,
           }}
         >
@@ -126,13 +156,13 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
             <motion.div
               className="project-card"
               key={p.id}
-              style={{ flex: `0 0 ${PROJECT_CARD_WIDTH}px` }}
+              style={{ flex: `0 0 ${layout.cardWidth}px` }}
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
               viewport={{ once: true }}
             >
-              <div className="project-visual" onClick={() => onProjectClick(p)} style={{ cursor: 'pointer' }}>
+              <div className="project-visual" onClick={() => onProjectClick(p)} style={{ cursor: "pointer" }}>
                 <img src={p.image} alt={p.title} className="project-image" loading="lazy" />
                 <div className="project-image-overlay">
                   <i className="fa-solid fa-expand"></i>
