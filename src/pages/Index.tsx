@@ -435,7 +435,35 @@ export default function Index() {
         });
       });
 
-      // ---- PROJECTS (handled by framer-motion) ----
+      // ---- PROJECTS HORIZONTAL SCROLL ----
+      const projectsTrack = document.querySelector('.projects-track') as HTMLElement;
+      const projectsSection = document.getElementById('projects');
+      if (projectsTrack && projectsSection) {
+        const trackWidth = projectsTrack.scrollWidth;
+        const viewportWidth = window.innerWidth;
+        const translateDistance = trackWidth - viewportWidth + viewportWidth * 0.1;
+
+        gsap.to(projectsTrack, {
+          x: -translateDistance,
+          ease: "none",
+          scrollTrigger: {
+            trigger: projectsSection,
+            start: "top top",
+            end: () => `+=${translateDistance}`,
+            scrub: 0.8,
+            pin: true,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        // Animate cards appearing
+        gsap.from('.project-card', {
+          opacity: 0, scale: 0.9,
+          stagger: 0.08, duration: 0.5, ease: "power2.out",
+          scrollTrigger: { trigger: projectsSection, start: "top 80%", toggleActions: "play none none none" }
+        });
+      }
 
       // ---- EDUCATION ----
       document.querySelectorAll('.education-card').forEach(card => {
