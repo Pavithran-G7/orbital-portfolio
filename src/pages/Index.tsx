@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { motion, useScroll, useTransform, useSpring } from "motion/react";
+import { motion } from "motion/react";
 import { Code2, FileCode, Braces, Atom, Wind, Server, Terminal, Database, CircuitBoard, Flame, GitBranch, Github, Container, Figma, Palette } from "lucide-react";
 import project001 from "@/assets/project-001.jpg";
 import project002 from "@/assets/project-002.jpg";
@@ -86,54 +86,14 @@ const PROJECT_GAP = 32;
 const NAVBAR_HEIGHT = 72;
 
 function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: typeof PROJECTS; onProjectClick: (p: typeof PROJECTS[0]) => void }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollMetrics, setScrollMetrics] = useState({
-    translateDistance: 0,
-    sectionHeight: 1600,
-  });
-
-  useEffect(() => {
-    const recalc = () => {
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      // Track width and visible viewport width (section has horizontal 5vw + 5vw padding)
-      const trackWidth = projects.length * PROJECT_CARD_WIDTH + (projects.length - 1) * PROJECT_GAP;
-      const horizontalPadding = viewportWidth * 0.1;
-      const visibleWidth = viewportWidth - horizontalPadding;
-
-      // Exact horizontal travel required to reveal the full last card
-      const translateDistance = Math.max(0, trackWidth - visibleWidth);
-      // Keep section pinned until horizontal travel is fully completed
-      const sectionHeight = Math.ceil(viewportHeight + translateDistance);
-
-      setScrollMetrics({ translateDistance, sectionHeight });
-    };
-
-    recalc();
-    window.addEventListener("resize", recalc);
-    return () => window.removeEventListener("resize", recalc);
-  }, [projects.length]);
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  const rawX = useTransform(scrollYProgress, [0, 1], [0, -scrollMetrics.translateDistance]);
-  const x = useSpring(rawX, { stiffness: 160, damping: 28, mass: 0.35 });
-
   return (
     <section
       id="projects"
-      ref={containerRef}
       className="projects-section"
-      style={{ height: `${scrollMetrics.sectionHeight}px`, position: "relative" }}
     >
       <div
+        className="projects-pin-wrapper"
         style={{
-          position: "sticky",
-          top: 0,
           height: "100vh",
           display: "flex",
           flexDirection: "column",
@@ -144,23 +104,19 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
       >
         <span className="section-label" style={{ marginBottom: 12 }}>// 03. MISSION LOG</span>
         <h2 className="section-heading" style={{ marginBottom: 32 }}>Featured <span className="accent">Projects</span></h2>
-        <motion.div
+        <div
+          className="projects-track"
           style={{
-            x,
             display: "flex",
             gap: `${PROJECT_GAP}px`,
             willChange: "transform",
           }}
         >
-          {projects.map((p, i) => (
-            <motion.div
+          {projects.map((p) => (
+            <div
               className="project-card"
               key={p.id}
               style={{ flex: `0 0 ${PROJECT_CARD_WIDTH}px` }}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              viewport={{ once: true }}
             >
               <div className="project-visual" onClick={() => onProjectClick(p)} style={{ cursor: "pointer" }}>
                 <img src={p.image} alt={p.title} className="project-image" loading="lazy" />
@@ -180,9 +136,9 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
                   <a href="#">{"</>"} SOURCE CODE</a>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -479,7 +435,35 @@ export default function Index() {
         });
       });
 
-      // ---- PROJECTS (handled by framer-motion) ----
+      // ---- PROJECTS HORIZONTAL SCROLL ----
+      const projectsTrack = document.querySelector('.projects-track') as HTMLElement;
+      const projectsSection = document.getElementById('projects');
+      if (projectsTrack && projectsSection) {
+        const trackWidth = projectsTrack.scrollWidth;
+        const viewportWidth = window.innerWidth;
+        const translateDistance = trackWidth - viewportWidth + viewportWidth * 0.1;
+
+        gsap.to(projectsTrack, {
+          x: -translateDistance,
+          ease: "none",
+          scrollTrigger: {
+            trigger: projectsSection,
+            start: "top top",
+            end: () => `+=${translateDistance}`,
+            scrub: 0.8,
+            pin: true,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        // Animate cards appearing
+        gsap.from('.project-card', {
+          opacity: 0, scale: 0.9,
+          stagger: 0.08, duration: 0.5, ease: "power2.out",
+          scrollTrigger: { trigger: projectsSection, start: "top 80%", toggleActions: "play none none none" }
+        });
+      }
 
       // ---- EDUCATION ----
       document.querySelectorAll('.education-card').forEach(card => {
