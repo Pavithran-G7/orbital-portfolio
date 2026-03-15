@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { motion, useScroll, useTransform, useSpring } from "motion/react";
+import { motion } from "motion/react";
 import { Code2, FileCode, Braces, Atom, Wind, Server, Terminal, Database, CircuitBoard, Flame, GitBranch, Github, Container, Figma, Palette } from "lucide-react";
 import project001 from "@/assets/project-001.jpg";
 import project002 from "@/assets/project-002.jpg";
