@@ -86,54 +86,58 @@ const PROJECT_GAP = 32;
 const NAVBAR_HEIGHT = 72;
 
 function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: typeof PROJECTS; onProjectClick: (p: typeof PROJECTS[0]) => void }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollMetrics, setScrollMetrics] = useState({
-    translateDistance: 0,
-    sectionHeight: 1600,
-  });
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const recalc = () => {
+    if (!sectionRef.current || !trackRef.current) return;
+
+    const track = trackRef.current;
+
+    // Wait for GSAP to be available
+    const setup = () => {
+      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+        requestAnimationFrame(setup);
+        return;
+      }
+
+      const trackWidth = track.scrollWidth;
       const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+      const translateDistance = trackWidth - viewportWidth + viewportWidth * 0.1; // account for 5vw padding each side
 
-      // Track width and visible viewport width (section has horizontal 5vw + 5vw padding)
-      const trackWidth = projects.length * PROJECT_CARD_WIDTH + (projects.length - 1) * PROJECT_GAP;
-      const horizontalPadding = viewportWidth * 0.1;
-      const visibleWidth = viewportWidth - horizontalPadding;
+      const tween = gsap.to(track, {
+        x: -translateDistance,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: () => `+=${translateDistance}`,
+          scrub: 0.8,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
 
-      // Exact horizontal travel required to reveal the full last card
-      const translateDistance = Math.max(0, trackWidth - visibleWidth);
-      // Keep section pinned until horizontal travel is fully completed
-      const sectionHeight = Math.ceil(viewportHeight + translateDistance);
-
-      setScrollMetrics({ translateDistance, sectionHeight });
+      return () => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      };
     };
 
-    recalc();
-    window.addEventListener("resize", recalc);
-    return () => window.removeEventListener("resize", recalc);
-  }, [projects.length]);
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  const rawX = useTransform(scrollYProgress, [0, 1], [0, -scrollMetrics.translateDistance]);
-  const x = useSpring(rawX, { stiffness: 160, damping: 28, mass: 0.35 });
+    // Delay to let GSAP load and other ScrollTriggers initialize first
+    const timeout = setTimeout(setup, 100);
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <section
       id="projects"
-      ref={containerRef}
+      ref={sectionRef}
       className="projects-section"
-      style={{ height: `${scrollMetrics.sectionHeight}px`, position: "relative" }}
     >
       <div
         style={{
-          position: "sticky",
-          top: 0,
           height: "100vh",
           display: "flex",
           flexDirection: "column",
@@ -144,9 +148,9 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
       >
         <span className="section-label" style={{ marginBottom: 12 }}>// 03. MISSION LOG</span>
         <h2 className="section-heading" style={{ marginBottom: 32 }}>Featured <span className="accent">Projects</span></h2>
-        <motion.div
+        <div
+          ref={trackRef}
           style={{
-            x,
             display: "flex",
             gap: `${PROJECT_GAP}px`,
             willChange: "transform",
@@ -182,7 +186,7 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
