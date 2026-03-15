@@ -86,57 +86,13 @@ const PROJECT_GAP = 32;
 const NAVBAR_HEIGHT = 72;
 
 function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: typeof PROJECTS; onProjectClick: (p: typeof PROJECTS[0]) => void }) {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!sectionRef.current || !trackRef.current) return;
-
-    const track = trackRef.current;
-
-    // Wait for GSAP to be available
-    const setup = () => {
-      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-        requestAnimationFrame(setup);
-        return;
-      }
-
-      const trackWidth = track.scrollWidth;
-      const viewportWidth = window.innerWidth;
-      const translateDistance = trackWidth - viewportWidth + viewportWidth * 0.1; // account for 5vw padding each side
-
-      const tween = gsap.to(track, {
-        x: -translateDistance,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: () => `+=${translateDistance}`,
-          scrub: 0.8,
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      return () => {
-        tween.scrollTrigger?.kill();
-        tween.kill();
-      };
-    };
-
-    // Delay to let GSAP load and other ScrollTriggers initialize first
-    const timeout = setTimeout(setup, 100);
-    return () => clearTimeout(timeout);
-  }, []);
-
   return (
     <section
       id="projects"
-      ref={sectionRef}
       className="projects-section"
     >
       <div
+        className="projects-pin-wrapper"
         style={{
           height: "100vh",
           display: "flex",
@@ -149,22 +105,18 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
         <span className="section-label" style={{ marginBottom: 12 }}>// 03. MISSION LOG</span>
         <h2 className="section-heading" style={{ marginBottom: 32 }}>Featured <span className="accent">Projects</span></h2>
         <div
-          ref={trackRef}
+          className="projects-track"
           style={{
             display: "flex",
             gap: `${PROJECT_GAP}px`,
             willChange: "transform",
           }}
         >
-          {projects.map((p, i) => (
-            <motion.div
+          {projects.map((p) => (
+            <div
               className="project-card"
               key={p.id}
               style={{ flex: `0 0 ${PROJECT_CARD_WIDTH}px` }}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              viewport={{ once: true }}
             >
               <div className="project-visual" onClick={() => onProjectClick(p)} style={{ cursor: "pointer" }}>
                 <img src={p.image} alt={p.title} className="project-image" loading="lazy" />
@@ -184,7 +136,7 @@ function ProjectsHorizontalScroll({ projects, onProjectClick }: { projects: type
                   <a href="#">{"</>"} SOURCE CODE</a>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
