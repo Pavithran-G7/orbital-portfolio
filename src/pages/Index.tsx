@@ -385,14 +385,11 @@ export default function Index() {
         gsap.delayedCall(1, cyclePhrase);
       }
 
-      gsap.to(".hero-text", {
-        x: -200, opacity: 0,
-        scrollTrigger: { trigger: "#home", start: "top top", end: "40% top", scrub: 0.5 }
+      const heroTl = gsap.timeline({
+        scrollTrigger: { trigger: "#home", start: "top top", end: "+=80%", scrub: 0.5, pin: true, pinSpacing: true }
       });
-      gsap.to(".hero-3d", {
-        x: 200, opacity: 0, scale: 0.7,
-        scrollTrigger: { trigger: "#home", start: "top top", end: "40% top", scrub: 0.5 }
-      });
+      heroTl.to(".hero-text", { x: -200, opacity: 0, duration: 1 }, 0);
+      heroTl.to(".hero-3d", { x: 200, opacity: 0, scale: 0.7, duration: 1 }, 0);
 
       // ---- ABOUT ----
       const aboutWords = document.querySelectorAll('.about-section [data-splitting] .word');
