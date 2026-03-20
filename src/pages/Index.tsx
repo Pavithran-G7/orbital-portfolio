@@ -386,12 +386,12 @@ export default function Index() {
       }
 
       gsap.to(".hero-text", {
-        x: -120, opacity: 0,
-        scrollTrigger: { trigger: "#home", start: "top top", end: "+=150%", scrub: 1, pin: true }
+        x: -200, opacity: 0,
+        scrollTrigger: { trigger: "#home", start: "top top", end: "40% top", scrub: 0.5 }
       });
       gsap.to(".hero-3d", {
-        scale: 0.6, opacity: 0, rotation: 30,
-        scrollTrigger: { trigger: "#home", start: "top top", end: "+=150%", scrub: 1 }
+        x: 200, opacity: 0, scale: 0.7,
+        scrollTrigger: { trigger: "#home", start: "top top", end: "40% top", scrub: 0.5 }
       });
 
       // ---- ABOUT ----
