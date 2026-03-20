@@ -727,13 +727,27 @@ export default function Index() {
           <span className="section-label">// 01. WHO I AM</span>
           <h2 className="section-heading" data-splitting>About <span className="accent">Me</span></h2>
           <div className="about-grid">
-            <div>
-              <div className="about-avatar-wrap">
-                <div className="about-avatar">AC</div>
-                <div className="about-avatar-border"></div>
-                <div className="about-scan-line"></div>
+            <div className="about-profile-card">
+              <div className="profile-card-glow"></div>
+              <div className="profile-card-inner">
+                <div className="profile-avatar-ring">
+                  <div className="profile-avatar-core">AC</div>
+                  <svg className="profile-ring-svg" viewBox="0 0 160 160">
+                    <circle className="ring-track" cx="80" cy="80" r="74" fill="none" stroke="hsl(var(--border-line))" strokeWidth="1.5" opacity="0.3" />
+                    <circle className="ring-progress" cx="80" cy="80" r="74" fill="none" stroke="hsl(var(--accent-ice))" strokeWidth="2" strokeLinecap="round" strokeDasharray="465" strokeDashoffset="93" />
+                  </svg>
+                </div>
+                <div className="profile-name-tag">ALEX CHEN</div>
+                <span className="profile-role-badge">STUDENT DEVELOPER</span>
+                <div className="profile-meta-row">
+                  <span className="profile-meta-item"><i className="fa-solid fa-location-dot"></i> Mumbai, IN</span>
+                  <span className="profile-meta-item"><i className="fa-solid fa-graduation-cap"></i> B.Tech CS</span>
+                </div>
+                <div className="profile-status-row">
+                  <span className="profile-status-dot"></span>
+                  Available for opportunities
+                </div>
               </div>
-              <span className="about-badge">STUDENT DEVELOPER</span>
             </div>
             <div className="about-text">
               <p data-splitting>I'm a third-year Computer Science student at Mumbai Institute of Technology with a deep passion for building beautiful, functional web experiences. My journey started with a simple HTML page in high school and has evolved into a full-stack skill set spanning React, Node.js, Python, and cloud technologies.</p>
